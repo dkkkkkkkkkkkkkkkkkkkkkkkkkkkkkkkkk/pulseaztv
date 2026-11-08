@@ -2,24 +2,21 @@
 
 PulseAZ TV is a native Android player and directory for Azerbaijani television and radio streams.
 
-## Version 1.5
+## Version 1.6
 
-- Redesigned dark navy interface with teal/blue accents, rounded cards, animated list entrances and a live indicator.
-- Native AndroidX Media3 / ExoPlayer playback. Channel selection never opens a website or an external browser.
-- TV and Radio sections, category filters, search and locally saved favourites.
-- Per-stream fallback URLs where an alternate public stream is available.
-- Video quality dialog exposes the video tracks actually offered by the selected HLS source. It cannot invent resolutions that the broadcaster does not provide.
-- Player resize modes: FIT, ZOOM and FILL.
-- Radio playback for public direct HTTPS MP3/AAC/HLS URLs, with an animated audio visualizer.
-- SVG interface icons replace emoji/glyph placeholders; channel logos try multiple public icon sources with branded initials as a fallback.
-- On selected channels, a transparent Android WebView remains attached beneath the native player and monitors the official public player and its resource list for up to 18 seconds. It captures only publicly exposed HTTPS `.m3u8` requests and passes them to Media3; no webpage is visible and no external browser is launched.
-- The resolver polls for delayed iframe/player initialization, attempts muted HTML5/JWPlayer/Video.js playback only after the user selects a channel, then captures its publicly requested HLS URL and Referer/Origin/User-Agent metadata. It reuses only cookies scoped to the exact stream URL.
-- Some official players wait for an explicit play action before requesting HLS; the hidden probe now triggers that action in the page engine while keeping all page content invisible and the native Media3 player as the only visible video surface.
-- Common HTTP failures (403, 404, 5xx) are explained in the player status. The app tests alternative sources and remembers successful non-expiring URLs per channel.
-- Slow animated ambient gradient background, floating logo, pulsing live badge, refined sans-serif typography, animated channel-card entrances and a radio equalizer add subtle visual effects.
-- Referer/Origin headers are sent when needed by the public player. The app does not bypass DRM, sign-in, geo restrictions, tokens, or other access controls.
-- Adaptive buffer targets and bounded source discovery improve startup and recovery on unstable networks.
+- Native AndroidX Media3 / ExoPlayer playback with HLS and MPEG-DASH support.
+- Multiple public provider pages per channel: broadcaster player pages plus public aggregators where available. The user can choose a source manually; automatic fallback also tries the list.
+- Provider pages are loaded invisibly and never drawn on screen. Only openly exposed HTTPS media URLs are handed to the native player; no external browser is opened.
+- Channel-aware page selection activates the requested channel on provider pages that list multiple channels, then probes HTML5, JWPlayer, Video.js and visible Play controls.
+- Audio controls include a volume slider, volume up/down and mute/unmute.
+- Video track selection is capped at 3840×2160 (4K). The app can play 4K only if the selected source actually provides a 4K rendition and the phone can decode it; it does not manufacture or upscale real 4K detail from a lower-resolution source.
+- TV and Radio sections, category filters, search and locally saved favourites remain available. Azərbaycan Beynəlxalq Radiosu has been removed from the radio list as requested.
+- Updated high-resolution channel logo sources and a newly generated PulseAZ TV launcher/app logo.
+- Referrer/Origin/User-Agent request metadata is passed when exposed by the public player. Cookies are only reused for the exact stream URL.
+- HTTP failures (403, 404, 5xx) are shown in the player status. The app does not bypass DRM, sign-in, geo restrictions, paid subscriptions, signed-token rules or other access controls.
+- Redesigned dark navy interface with an ambient animated gradient, refined typography, animated channel cards, live badge and radio visualizer.
 - Portable TV + radio M3U playlist at `app/src/main/assets/pulseaz-az.m3u`.
+
 
 ## Stream catalogue sources
 
@@ -38,4 +35,8 @@ The GitHub Actions workflow `.github/workflows/android-apk.yml` builds the debug
 3. Open the latest successful run.
 4. Download the **PulseAZ-TV-debug-apk** artifact and extract `app-debug.apk`.
 
-The project uses JDK 17, Gradle 8.13, Android Gradle Plugin 8.13.2, Kotlin 2.3.0, Android API 36 and AndroidX Media3 1.11.1. App version is 1.5.0 (versionCode 6). AzTV's paid Cinerama source and Kanal 35 have been removed.
+The project uses JDK 17, Gradle 8.13, Android Gradle Plugin 8.13.2, Kotlin 2.3.0, Android API 36 and AndroidX Media3 1.11.1 (ExoPlayer, HLS and DASH). App version is 1.6.0 (versionCode 7). AzTV's paid Cinerama source and Kanal 35 have been removed.
+
+## Logo sources
+
+The launcher icon is an original PulseAZ TV design generated for this project. Channel identification artwork uses the AzTV (2019), Mədəniyyət TV (2019) and Naxçıvan TV (2025) images listed as CC0 on Wikimedia Commons, the AnewZ logo served by AnewZ's own website, and the Xəzər TV image supplied on TVSTREAM.AZ. Channel marks are displayed only to identify the selected broadcaster.
