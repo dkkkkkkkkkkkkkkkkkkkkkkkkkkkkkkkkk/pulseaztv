@@ -1105,11 +1105,85 @@ class MainActivity : Activity() {
         return error.errorCodeName.replace('_', ' ').lowercase()
     }
 
-    private fun playStreamAtIndex(isAudio: Boolean) {
-        val url = activeStreams.getOrNull(activeStreamIndex) ?: run {
+    private fun fetchYodaToken(callback: (String?) -> Unit) {
+        val nowSeconds = System.currentTimeMillis() / 1000L
+        val cached = yodaTokenCache
+        if (!cached.isNullOrBlank() && yodaTokenExpiresAt > nowSeconds + 10L) {
+            callback(cached)
+            return
+        }
+        Thread {
+            var fetched: String? = null
+            var expiry = 0L
+            var connection: HttpURLConnection? = null
+            try {
+                connection = (URL("https://yoda.az/stream-token.php").openConnection() as HttpURLConnection).apply {
+                    requestMethod = "GET"
+                    connectTimeout = 7000
+                    readTimeout = 9000
+                    instanceFollowRedirects = true
+                    setRequestProperty("User-Agent", "PulseAZTV/1.7 (Android)")
+                    setRequestProperty("Accept", "application/json")
+                }
+                if (connection.responseCode in 200..299) {
+                    val body = connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
+                    val json = org.json.JSONObject(body)
+                    fetched = json.optString("token").takeIf { it.isNotBlank() && it != "null" }
+                    expiry = json.optLong("exp", 0L)
+                    if (expiry > 1000000000000L) expiry /= 1000L
+                    if (expiry <= 0L) expiry = System.currentTimeMillis() / 1000L + 120L
+                }
+            } catch (_: Exception) {
+                fetched = null
+            } finally {
+                connection?.disconnect()
+            }
+            runOnUiThread {
+                if (!fetched.isNullOrBlank()) {
+                    yodaTokenCache = fetched
+                    yodaTokenExpiresAt = expiry
+                }
+                callback(fetched)
+            }
+        }.start()
+    }
+
+    private fun appendYodaToken(url: String, token: String): String {
+        return runCatching {
+            val uri = Uri.parse(url)
+            if (!uri.host.orEmpty().endsWith("yodacdn.net", ignoreCase = true) ||
+                !uri.getQueryParameter("token").isNullOrBlank()) {
+                url
+            } else {
+                uri.buildUpon().appendQueryParameter("token", token).build().toString()
+            }
+        }.getOrDefault(url)
+    }
+
+    private fun playStreamAtIndex(
+        isAudio: Boolean,
+        allowTokenFetch: Boolean = true,
+        overrideUrl: String? = null
+    ) {
+        val url = overrideUrl ?: activeStreams.getOrNull(activeStreamIndex) ?: run {
             tryNextSource()
             return
         }
+        val parsedUrl = runCatching { Uri.parse(url) }.getOrNull()
+        val isYodaStream = parsedUrl?.host?.endsWith("yodacdn.net", ignoreCase = true) == true
+        val hasYodaToken = parsedUrl?.getQueryParameter("token").isNullOrBlank().not()
+        if (allowTokenFetch && isYodaStream && !hasYodaToken) {
+            val requestCode = selectedChannel?.code ?: selectedRadio?.code
+            val requestIndex = activeStreamIndex
+            fetchYodaToken { token ->
+                val stillSelected = selectedChannel?.code == requestCode || selectedRadio?.code == requestCode
+                if (!stillSelected || activeStreamIndex != requestIndex) return@fetchYodaToken
+                val taggedUrl = if (token.isNullOrBlank()) url else appendYodaToken(url, token)
+                playStreamAtIndex(isAudio, false, taggedUrl)
+            }
+            return
+        }
+
         if (!url.startsWith("https://", ignoreCase = true)) {
             tryNextSource()
             return
