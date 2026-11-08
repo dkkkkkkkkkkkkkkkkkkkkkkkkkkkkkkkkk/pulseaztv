@@ -5,7 +5,7 @@
 
     <application
         android:allowBackup="false"
-        android:icon="@drawable/pulseaz_logo"
+        android:icon="@drawable/pulseaz_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
