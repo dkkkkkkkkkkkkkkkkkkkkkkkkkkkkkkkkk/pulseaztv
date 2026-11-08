@@ -1194,7 +1194,7 @@ class MainActivity : Activity() {
                 }
               } catch(e) {}
               var html = document.documentElement ? document.documentElement.innerHTML : '';
-              var m = html.match(/https?:\\\\/\\\\/[^"'\\\\s<>]+?\\\\.m3u8(?:\\\\?[^"'\\\\s<>]*)?/i);
+              var m = html.match(/https?:\\\\/\\\\/[^"'\\\\s<>]+?\\\\.(?:m3u8|mpd|mp4|m4v|mp3|m4a|aac)(?:\\\\?[^"'\\\\s<>]*)?/i);
               if (m) add(m[0].replace(/\\\\\\\\\\//g, '/').replace(/&amp;/g, '&'));
               return found.length ? found[0] : null;
             })();
