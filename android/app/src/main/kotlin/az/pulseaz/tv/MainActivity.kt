@@ -1360,6 +1360,36 @@ class MainActivity : Activity() {
                   if (found.indexOf(v) < 0) found.push(v);
                 }
               }
+              // Legacy public APIs may return a manifest under full_url or threadAddress.
+              // Only use an exposed HTTPS media URL returned directly by the provider response.
+              function walkProviderData(value, depth) {
+                if (!value || depth > 9) return;
+                if (typeof value === 'string') { add(value); return; }
+                if (Array.isArray(value)) {
+                  value.forEach(function(item) { walkProviderData(item, depth + 1); });
+                  return;
+                }
+                if (typeof value === 'object') {
+                  var candidate = value.full_url || value.threadAddress || value.thread_address ||
+                    value.play_url || value.stream_url || value.file || value.url;
+                  var token = value.token || value.streamToken || value.stream_token;
+                  if (typeof candidate === 'string' && typeof token === 'string' &&
+                      /^https:\\/\\//i.test(candidate) &&
+                      /\\.(?:m3u8|mpd|mp4|m4v|mp3|m4a|aac)(?:$|[?#])/i.test(candidate) &&
+                      !/[?&]token=/i.test(candidate)) {
+                    add(candidate + (candidate.indexOf('?') >= 0 ? '&' : '?') + 'token=' + encodeURIComponent(token));
+                  }
+                  Object.keys(value).forEach(function(key) {
+                    walkProviderData(value[key], depth + 1);
+                  });
+                }
+              }
+              try {
+                var responseText = document.body ? (document.body.innerText || document.body.textContent || '') : '';
+                if (responseText && responseText.length < 2000000) {
+                  walkProviderData(JSON.parse(responseText), 0);
+                }
+              } catch(e) {}
               // Some official players create their HLS request only after a play action.
               // Channel selection in PulseAZ is the user's play intent, so start this hidden probe muted.
               function startVideo(v) {
