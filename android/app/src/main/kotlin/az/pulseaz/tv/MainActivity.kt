@@ -344,7 +344,7 @@ class MainActivity : Activity() {
         }
 
         val appLogo = ImageView(this).apply {
-            setImageResource(R.drawable.pulseaz_logo)
+            setImageResource(R.drawable.pulseaz_launcher)
             scaleType = ImageView.ScaleType.FIT_CENTER
         }
         header.addView(appLogo, LinearLayout.LayoutParams(dp(46), dp(46)))
@@ -1452,7 +1452,30 @@ class MainActivity : Activity() {
                         setRequestProperty("User-Agent", "Mozilla/5.0 PulseAZTV/1.4")
                     }
                     if (connection.responseCode in 200..299) {
-                        connection.inputStream.use { bitmap = BitmapFactory.decodeStream(it) }
+                        val bytes = connection.inputStream.use { it.readBytes() }
+                        val contentType = connection.contentType.orEmpty().lowercase()
+                        bitmap = if (contentType.contains("svg") || candidate.substringBefore("?").endsWith(".svg", true)) {
+                            runCatching {
+                                val svg = SVG.getFromString(bytes.toString(Charsets.UTF_8))
+                                val outputSize = 320
+                                val output = Bitmap.createBitmap(outputSize, outputSize, Bitmap.Config.ARGB_8888)
+                                val canvas = Canvas(output)
+                                val docWidth = svg.documentWidth.takeIf { it > 0f } ?: outputSize.toFloat()
+                                val docHeight = svg.documentHeight.takeIf { it > 0f } ?: outputSize.toFloat()
+                                val scale = minOf(outputSize / docWidth, outputSize / docHeight)
+                                canvas.save()
+                                canvas.translate(
+                                    (outputSize - docWidth * scale) / 2f,
+                                    (outputSize - docHeight * scale) / 2f
+                                )
+                                canvas.scale(scale, scale)
+                                svg.renderToCanvas(canvas)
+                                canvas.restore()
+                                output
+                            }.getOrNull()
+                        } else {
+                            BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                        }
                     }
                 } catch (_: Exception) {
                     bitmap = null
