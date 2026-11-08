@@ -1018,10 +1018,6 @@ class MainActivity : Activity() {
                 if (!origin.isNullOrBlank()) headers["Origin"] = origin
             }
 
-            // CookieManager returns only cookies scoped to this exact stream URL.
-            runCatching { CookieManager.getInstance().getCookie(url) }
-                .getOrNull()?.takeIf { it.isNotBlank() }?.let { headers["Cookie"] = it }
-
             val userAgent = streamRequestHeaders["User-Agent"]
                 ?: "Mozilla/5.0 (Linux; Android 11) AppleWebKit/537.36 Chrome/130.0.0.0 Mobile Safari/537.36 PulseAZTV/1.4"
             val sourceFactory = DefaultHttpDataSource.Factory()
@@ -1436,8 +1432,7 @@ class MainActivity : Activity() {
             ?: runCatching { Uri.parse(url).host }.getOrNull().orEmpty()
         val candidates = listOf(
             url,
-            "https://www.google.com/s2/favicons?domain=$domain&sz=256",
-            "https://icons.duckduckgo.com/ip3/$domain.ico"
+            "https://www.google.com/s2/favicons?domain=$domain&sz=256"
         ).distinct()
 
         Thread {
@@ -1475,6 +1470,10 @@ class MainActivity : Activity() {
                             }.getOrNull()
                         } else {
                             BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                        }
+                        // Very small favicons are blurred in a 58dp tile; keep the sharp initials instead.
+                        if (bitmap != null && (bitmap!!.width < 96 || bitmap!!.height < 96)) {
+                            bitmap = null
                         }
                     }
                 } catch (_: Exception) {
