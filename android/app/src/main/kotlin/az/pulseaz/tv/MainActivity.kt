@@ -276,6 +276,21 @@ class MainActivity : Activity() {
             .setMediaSourceFactory(DefaultMediaSourceFactory(httpFactory))
             .build()
 
+        player?.let { activePlayer ->
+            activePlayer.setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(C.USAGE_MEDIA)
+                    .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
+                    .build(),
+                true
+            )
+            // Auto quality adapts up to 3840x2160 when the source and device support it.
+            activePlayer.trackSelectionParameters = activePlayer.trackSelectionParameters
+                .buildUpon()
+                .setMaxVideoSize(3840, 2160)
+                .build()
+        }
+
         playerView.player = player
         player?.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
@@ -815,6 +830,63 @@ class MainActivity : Activity() {
         }
         card.addView(favorite, LinearLayout.LayoutParams(dp(40), dp(48)))
         return card
+    }
+
+    private fun showSourceDialog() {
+        val channel = selectedChannel ?: run {
+            Toast.makeText(this, "Əvvəl TV kanalı seç.", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val pages = resolverPages[channel.code].orEmpty()
+        if (pages.isEmpty()) {
+            Toast.makeText(this, "Bu kanal üçün əlavə player səhifəsi yoxdur.", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val labels = pages.mapIndexed { index, page ->
+            val host = Uri.parse(page).host ?: page
+            (index + 1).toString() + ". " + host
+        }.toTypedArray()
+        AlertDialog.Builder(this)
+            .setTitle(channel.name + " · yayım mənbələri")
+            .setItems(labels) { _, index ->
+                cancelStreamResolver()
+                activeStreamIndex = activeStreams.lastIndex
+                pageResolutionAttempted = index
+                pageResolutionInProgress = false
+                streamReferer = null
+                streamRequestHeaders = emptyMap()
+                lastPlaybackError = null
+                statusText.setTextColor(textMuted)
+                statusText.text = labels[index] + " yoxlanılır…"
+                emptyPlayerHint.visibility = View.GONE
+                tryNextSource()
+            }
+            .setNegativeButton("Bağla", null)
+            .show()
+    }
+
+    private fun setPlayerVolume(requested: Float) {
+        val volume = requested.coerceIn(0f, 1f)
+        player?.volume = volume
+        if (volume > 0f) lastNonMutedVolume = volume
+        if (::volumeSlider.isInitialized && volumeSlider.progress != (volume * 100f).toInt()) {
+            volumeSlider.progress = (volume * 100f).toInt()
+        }
+        if (::volumeValueText.isInitialized) volumeValueText.text = (volume * 100f).toInt().toString() + "%"
+        if (::muteButton.isInitialized) {
+            muteButton.text = if (volume <= 0f) "Səsi aç" else "Mute"
+            muteButton.setTextColor(if (volume <= 0f) accentBlue else accent)
+        }
+    }
+
+    private fun toggleMute() {
+        val current = player?.volume ?: 1f
+        if (current > 0f) {
+            lastNonMutedVolume = current
+            setPlayerVolume(0f)
+        } else {
+            setPlayerVolume(lastNonMutedVolume.coerceIn(0.1f, 1f))
+        }
     }
 
     private fun playChannel(channel: TvChannel) {
