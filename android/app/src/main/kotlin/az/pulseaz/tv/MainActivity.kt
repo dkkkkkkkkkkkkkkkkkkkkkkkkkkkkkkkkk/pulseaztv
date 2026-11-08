@@ -1158,7 +1158,7 @@ class MainActivity : Activity() {
                 try {
                   var t = ((b.getAttribute('aria-label') || '') + ' ' +
                     (b.getAttribute('title') || '') + ' ' + (b.innerText || '')).toLowerCase();
-                  if (/play|start|watch live|canlı izlə|izlə/.test(t)) b.click();
+                  if (/play|start|watch live|live|canlı|izlə/.test(t)) b.click();
                 } catch(e) {}
               });
               try {
