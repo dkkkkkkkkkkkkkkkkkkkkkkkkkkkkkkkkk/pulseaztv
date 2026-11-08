@@ -4,6 +4,7 @@ import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.app.Activity
+import android.app.AlertDialog
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
@@ -28,6 +29,7 @@ import android.widget.HorizontalScrollView
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
+import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import android.webkit.CookieManager
@@ -37,6 +39,7 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
@@ -95,6 +98,10 @@ class MainActivity : Activity() {
     private lateinit var qualityButton: TextView
     private lateinit var fitButton: TextView
     private lateinit var retryButton: TextView
+    private lateinit var sourceButton: TextView
+    private lateinit var muteButton: TextView
+    private lateinit var volumeValueText: TextView
+    private lateinit var volumeSlider: SeekBar
     private lateinit var searchBox: EditText
     private lateinit var channelList: LinearLayout
     private lateinit var filterRow: LinearLayout
@@ -116,6 +123,7 @@ class MainActivity : Activity() {
     private var streamReferer: String? = null
     private var streamRequestHeaders: Map<String, String> = emptyMap()
     private var lastPlaybackError: String? = null
+    private var lastNonMutedVolume = 1f
     private var resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
     private val animations = mutableListOf<Animator>()
     private val audioAnimations = mutableListOf<Animator>()
@@ -124,34 +132,36 @@ class MainActivity : Activity() {
     private val loadingLogos = HashSet<String>()
 
     // Only inspect publicly reachable pages for openly exposed HTTPS HLS media.
+    // Provider pages are probed invisibly; only public media files are passed to native Media3.
+    // The user can also choose a provider manually from the Sources panel.
     private val resolverPages = mapOf(
         "AZTV" to listOf(
             "https://yodaplayer.yodacdn.net/aztvpop/index.php",
-            "https://aztv.az/en/live",
-            "https://aztv.az/az"
+            "https://aztv.az/az",
+            "https://operativmm.az/az/canli-tv/aztv",
+            "https://tvstream.az/"
         ),
         "MEDEN" to listOf(
             "https://yodaplayer.yodacdn.net/medeniyyetpop/index.php",
-            "https://www.medeniyyettv.az/az/faq",
-            "https://medeniyyettv.az/az"
+            "https://www.medeniyyettv.az/az",
+            "https://operativmm.az/az/canli-tv/medeniyyet"
         ),
         "NTV" to listOf(
             "https://live.ntv.az/",
             "https://yodaplayer.yodacdn.net/ntvpop/index.php",
-            "https://www.ntv.az/"
+            "https://www.ntv.az/",
+            "https://operativmm.az/az/canli-tv/naxcivan-tv"
         ),
         "ANEWZ" to listOf(
             "https://cdn.maksnet.tv/em/cubesanewz-secure/?abr-app=web&streamname=live",
-            "https://anewz.tv/tv-live"
+            "https://anewz.tv/tv-live",
+            "https://operativmm.az/az/canli-tv/anewz"
         ),
         "XEZER" to listOf(
             "https://xezerxeber.az/en/live",
+            "https://www.xezerxeber.az/stream/index.m3u8",
+            "https://operativmm.az/az/canli-tv/xezer-tv",
             "https://tvstream.az/"
-        ),
-        "AZINT" to listOf(
-            "https://yodaplayer.yodacdn.net/radiointpop/index.php",
-            "https://internationalradio.az/en/faq",
-            "https://internationalradio.az/az"
         )
     )
     private var resolverWebView: WebView? = null
@@ -165,13 +175,13 @@ class MainActivity : Activity() {
         TvChannel("AzTV", "AZTV", "Xəbər", listOf(
             "https://str.yodacdn.net/aztv/index.m3u8",
             "https://str.yodacdn.net/azertv/index.m3u8"
-        ), "https://www.google.com/s2/favicons?domain=aztv.az&sz=256", "Yalnız açıq rəsmi yayım mənbələri"),
+        ), "https://upload.wikimedia.org/wikipedia/commons/4/4b/AzTV_%282019%29.png", "Rəsmi sayt + əlavə açıq player mənbələri"),
         TvChannel("Baku TV", "BAKU", "Xəbər", listOf(
             "https://rtmp.baku.tv/hls/bakutv.m3u8"
         ), "https://www.google.com/s2/favicons?domain=baku.tv&sz=128", "Canlı yayım"),
         TvChannel("AnewZ", "ANEWZ", "Xəbər", listOf(
             "https://53be5ef2d13aa.streamlock.net/cubesanewz-secure/smil:cubesanewz-secure-web.smil/playlist.m3u8"
-        ), "https://xalqqazeti.az/uploads/news/116512/1_1_f.png", "Rəsmi səhifədən HLS yoxlanılır"),
+        ), "https://anewz.tv/files-redizajn/img/logo-text.svg", "Rəsmi və açıq player mənbələri"),
         TvChannel("İctimai TV", "ITV", "Xəbər", listOf(
             "https://live.itv.az/itv.m3u8"
         ), "https://www.google.com/s2/favicons?domain=itv.az&sz=128", "Canlı yayım"),
@@ -185,15 +195,15 @@ class MainActivity : Activity() {
             "https://str.yodacdn.net/medeniyyet/index.m3u8",
             "https://str.yodacdn.net/medeniyyettele/index.m3u8",
             "https://streams.livetv.az/azerbaijan/medeniyyet_stream2/playlist.m3u8"
-        ), "https://www.google.com/s2/favicons?domain=medeniyyettv.az&sz=256", "Rəsmi player və alternativ HLS mənbələri"),
+        ), "https://upload.wikimedia.org/wikipedia/commons/2/25/M%C9%99d%C9%99niyy%C9%99t_TV_%282019%29.png", "Rəsmi player və alternativ HLS mənbələri"),
         TvChannel("Naxçıvan TV", "NTV", "Regional", listOf(
             "https://str2.yodacdn.net/ntv/video.m3u8",
             "https://streams.livetv.az/azerbaijan/nax/playlist.m3u8"
-        ), "https://www.google.com/s2/favicons?domain=ntv.az&sz=256", "Rəsmi Yoda player və alternativ HLS mənbələri"),
+        ), "https://upload.wikimedia.org/wikipedia/commons/f/fa/Nax%C3%A7%C4%B1van_TV_%282025%29.png", "Rəsmi player və alternativ HLS mənbələri"),
         TvChannel("Xəzər TV", "XEZER", "Əyləncə", listOf(
             "https://www.xezerxeber.az/stream/index.m3u8",
             "https://xezerxeber.az/stream/main_stream.m3u8"
-        ), "https://upload.wikimedia.org/wikipedia/en/9/97/X%C9%99z%C9%99r_TV_Logo.png", "Bir neçə birbaşa HLS mənbə və rəsmi player"),
+        ), "https://tvstream.az/assets/xezertv.jpg", "Rəsmi və alternativ player mənbələri"),
         TvChannel("Ayaz TV", "AYAZ", "Musiqi", listOf(
             "https://janya-ayaztv.vgcdn.net/ptnr-WebApp/title-Ayaz_TV/v1/vglive-sk-934820/main.m3u8"
         ), "https://www.google.com/s2/favicons?domain=ayaztv.az&sz=128", "720p mənbə kimi siyahılanıb"),
@@ -206,10 +216,6 @@ class MainActivity : Activity() {
         RadioStation("İctimai Radio · 90 FM", "ITV90", "Xəbər", listOf(
             "https://stream.itv.az/rtmp:/radio/playlist.m3u8"
         ), "https://www.google.com/s2/favicons?domain=itv.az&sz=128"),
-        RadioStation("Azərbaycan Beynəlxalq Radiosu", "AZINT", "Milli", listOf(
-            "https://str.yodacdn.net/radio_int/tracks-v1a1/mono.m3u8",
-            "https://str.yodacdn.net/radio_int/tracks-a1/mono.m3u8"
-        ), "https://www.google.com/s2/favicons?domain=internationalradio.az&sz=256"),
         RadioStation("Araz FM · 103.3", "ARAZ", "Musiqi", listOf(
             "https://s14.myradiostream.com/30454/listen.mp3"
         ), "https://www.google.com/s2/favicons?domain=arazfm.az&sz=128"),
