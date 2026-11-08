@@ -1043,6 +1043,7 @@ class MainActivity : Activity() {
         favoritesOnly = false
         titleText.text = station.name
         audioTitle.text = station.name
+        loadRadioTrack(station)
         audioPanel.visibility = View.VISIBLE
         playerView.visibility = View.GONE
         emptyPlayerHint.visibility = View.GONE
@@ -1052,6 +1053,69 @@ class MainActivity : Activity() {
         rememberRecent("RADIO_" + station.code)
         statusText.text = "Radio bağlantısı yoxlanılır…"
         startStream(station.streams, true)
+    }
+
+    private fun loadRadioTrack(station: RadioStation) {
+        val metadataUrl = station.trackUrl ?: return
+        Thread {
+            var artist: String? = null
+            var title: String? = null
+            var connection: HttpURLConnection? = null
+            try {
+                connection = (URL(metadataUrl).openConnection() as HttpURLConnection).apply {
+                    connectTimeout = 5000
+                    readTimeout = 6500
+                    instanceFollowRedirects = true
+                    setRequestProperty("User-Agent", "PulseAZTV/1.7 (Android)")
+                    setRequestProperty("Accept", "application/json")
+                }
+                if (connection.responseCode in 200..299) {
+                    val body = connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
+                    val root = org.json.JSONTokener(body).nextValue()
+                    fun findValue(value: Any?, keys: Set<String>, depth: Int): String? {
+                        if (depth > 8 || value == null) return null
+                        when (value) {
+                            is org.json.JSONObject -> {
+                                for (key in keys) {
+                                    val candidate = value.opt(key)
+                                    if (candidate is String && candidate.isNotBlank()) return candidate
+                                }
+                                val iterator = value.keys()
+                                while (iterator.hasNext()) {
+                                    val found = findValue(value.opt(iterator.next()), keys, depth + 1)
+                                    if (!found.isNullOrBlank()) return found
+                                }
+                            }
+                            is org.json.JSONArray -> {
+                                for (index in 0 until value.length()) {
+                                    val found = findValue(value.opt(index), keys, depth + 1)
+                                    if (!found.isNullOrBlank()) return found
+                                }
+                            }
+                        }
+                        return null
+                    }
+                    artist = findValue(root, setOf("artist", "performer", "author"), 0)
+                    title = findValue(root, setOf("current_track", "currentTrack", "track_title", "title", "song"), 0)
+                }
+            } catch (_: Exception) {
+                // Track metadata is optional; audio playback continues without it.
+            } finally {
+                connection?.disconnect()
+            }
+            val display = when {
+                !artist.isNullOrBlank() && !title.isNullOrBlank() -> artist + " — " + title
+                !title.isNullOrBlank() -> title
+                else -> null
+            }
+            if (!display.isNullOrBlank()) {
+                runOnUiThread {
+                    if (selectedRadio?.code == station.code && !isFinishing && !isDestroyed) {
+                        audioTitle.text = display
+                    }
+                }
+            }
+        }.start()
     }
 
     private fun startStream(streams: List<String>, isAudio: Boolean) {
@@ -1888,9 +1952,25 @@ class MainActivity : Activity() {
 
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
 
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+            selectedChannel != null && player?.isPlaying == true) {
+            runCatching {
+                enterPictureInPictureMode(
+                    PictureInPictureParams.Builder()
+                        .setAspectRatio(Rational(16, 9))
+                        .build()
+                )
+            }
+        }
+    }
+
     override fun onPause() {
         super.onPause()
-        player?.pause()
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || !isInPictureInPictureMode) {
+            player?.pause()
+        }
     }
 
     override fun onDestroy() {
