@@ -1,35 +1,61 @@
 #EXTM3U
-# Azərbaycan kanalları üçün açıq kataloqlarda yayımlanmış HLS ünvanları.
-# Mənbə: https://github.com/iptv-org/iptv/blob/master/streams/az.m3u
-# Ünvanlar dəyişə, dayana və ya region məhdudiyyətinə düşə bilər.
-# Yayımları saxlamırıq və məhdudiyyətləri keçmirik.
+# PulseAZ TV 1.1 — direct media streams only.
+# TV candidates are listed in the community-maintained iptv-org Azerbaijan list:
+# https://github.com/iptv-org/iptv/blob/master/streams/az.m3u
+# Radio candidates are listed as direct HTTPS streams in the Azerbaijan station directory:
+# https://www.freqtrail.com/stations/AZ
+# Links may be changed or restricted by their operators; availability is not guaranteed.
 
-#EXTINF:-1 tvg-name="AzTV" group-title="Xəbər",AzTV
-https://stream8.cinerama.uz/1455/tracks-v1a1/mono.m3u8
-
-#EXTINF:-1 tvg-name="ATV" group-title="Əyləncə",ATV
-https://lives.atv.az:5443/ATV_TV_STREAM/streams/atvcanli.m3u8
-
-#EXTINF:-1 tvg-name="Baku TV" group-title="Xəbər",Baku TV
+#EXTINF:-1 tvg-id="AzTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=aztv.az&sz=128" group-title="TV | Xəbər",AzTV
+https://str.yodacdn.net/azertv/index.m3u8
+#EXTINF:-1 tvg-id="BakuTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=baku.tv&sz=128" group-title="TV | Xəbər",Baku TV
 https://rtmp.baku.tv/hls/bakutv.m3u8
-
-#EXTINF:-1 tvg-name="EL TV" group-title="Regional",EL TV
-https://live.eltv.az/live/eltv/playlist.m3u8
-
-#EXTINF:-1 tvg-name="İctimai TV" group-title="Xəbər",İctimai TV
+#EXTINF:-1 tvg-id="AnewZ.az" tvg-logo="https://www.google.com/s2/favicons?domain=anewz.tv&sz=128" group-title="TV | Xəbər",AnewZ
+https://53be5ef2d13aa.streamlock.net/cubesanewz-secure/smil:cubesanewz-secure-web.smil/playlist.m3u8
+#EXTINF:-1 tvg-id="IctimaiTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=itv.az&sz=128" group-title="TV | Xəbər",İctimai TV
 https://live.itv.az/itv.m3u8
-
-#EXTINF:-1 tvg-name="Kanal 35" group-title="Regional",Kanal 35
+#EXTINF:-1 tvg-id="ELTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=eltv.az&sz=128" group-title="TV | Regional",EL TV
+https://live.eltv.az/live/eltv/playlist.m3u8
+#EXTINF:-1 tvg-id="Kanal35.az" tvg-logo="https://www.google.com/s2/favicons?domain=kanal35.az&sz=128" group-title="TV | Regional",Kanal 35
 https://str2.yodacdn.net/kanal35/index.m3u8
-
-#EXTINF:-1 tvg-name="Kanal S" group-title="Regional",Kanal S
+#EXTINF:-1 tvg-id="KanalS.az" tvg-logo="https://www.google.com/s2/favicons?domain=kanals.az&sz=128" group-title="TV | Regional",Kanal S
 https://lives.atv.az:5443/KANAL-S/streams/kanals.m3u8
-
-#EXTINF:-1 tvg-name="Mədəniyyət TV" group-title="Mədəniyyət",Mədəniyyət TV
+#EXTINF:-1 tvg-id="MedeniyyetTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=aztv.az&sz=128" group-title="TV | Mədəniyyət",Mədəniyyət TV
 https://str.yodacdn.net/medeniyyettele/index.m3u8
-
-#EXTINF:-1 tvg-name="Naxçıvan TV" group-title="Regional",Naxçıvan TV
+#EXTINF:-1 tvg-id="NaxcivanTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=ntv.az&sz=128" group-title="TV | Regional",Naxçıvan TV
 https://str2.yodacdn.net/ntv/video.m3u8
-
-#EXTINF:-1 tvg-name="Xəzər TV" group-title="Əyləncə",Xəzər TV
+#EXTINF:-1 tvg-id="XezerTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=xezerxeber.az&sz=128" group-title="TV | Əyləncə",Xəzər TV
 https://www.xezerxeber.az/stream/index.m3u8
+#EXTINF:-1 tvg-id="AyazTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=ayaztv.az&sz=128" group-title="TV | Musiqi",Ayaz TV
+https://janya-ayaztv.vgcdn.net/ptnr-WebApp/title-Ayaz_TV/v1/vglive-sk-934820/main.m3u8
+#EXTINF:-1 tvg-id="VilayetTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=livekadeh.com&sz=128" group-title="TV | Regional",Vilayət TV
+https://nl.livekadeh.com/hls2/vilayet.m3u8
+
+#EXTINF:-1 tvg-id="IctimaiRadio.az" tvg-logo="https://www.google.com/s2/favicons?domain=itv.az&sz=128" group-title="Radio | Xəbər",İctimai Radio 90 FM
+https://stream.itv.az/rtmp:/radio/playlist.m3u8
+#EXTINF:-1 tvg-id="AzerbaijanInternationalRadio.az" tvg-logo="https://www.google.com/s2/favicons?domain=aztv.az&sz=128" group-title="Radio | Milli",Azərbaycan Beynəlxalq Radiosu
+https://str.yodacdn.net/radio_int/tracks-a1/mono.m3u8
+#EXTINF:-1 tvg-id="ArazFM.az" tvg-logo="https://www.google.com/s2/favicons?domain=arazfm.az&sz=128" group-title="Radio | Musiqi",Araz FM 103.3
+https://s14.myradiostream.com/30454/listen.mp3
+#EXTINF:-1 tvg-id="AsanRadio.az" tvg-logo="https://www.google.com/s2/favicons?domain=asanradio.az&sz=128" group-title="Radio | Xəbər",ASAN Radio
+https://play.asanradio.az/
+#EXTINF:-1 tvg-id="YurdFM.az" tvg-logo="https://www.google.com/s2/favicons?domain=livetv.az&sz=128" group-title="Radio | Milli",Yurd FM
+https://icecast.livetv.az/yurdfm
+#EXTINF:-1 tvg-id="MediaFM.az" tvg-logo="https://www.google.com/s2/favicons?domain=livetv.az&sz=128" group-title="Radio | Musiqi",Media FM 105.5
+https://icecast.livetv.az/mediafm
+#EXTINF:-1 tvg-id="AntiRadio.az" tvg-logo="https://www.google.com/s2/favicons?domain=antiradio.net&sz=128" group-title="Radio | Musiqi",Anti Radio
+https://stream.antiradio.net/listen/anti_radio/mp3
+#EXTINF:-1 tvg-id="NazRadio.az" tvg-logo="https://www.google.com/s2/favicons?domain=myradiostream.com&sz=128" group-title="Radio | Musiqi",NAZ Radio
+https://s2.myradiostream.com/5286/listen.mp3
+#EXTINF:-1 tvg-id="AutoLifeRadio.az" tvg-logo="https://www.google.com/s2/favicons?domain=autoliferadio.com&sz=128" group-title="Radio | Musiqi",AutoLife Radio Azerbaijan
+https://radio.autoliferadio.com:8005/radio
+#EXTINF:-1 tvg-id="CaspianBusinessRadio.az" tvg-logo="https://www.google.com/s2/favicons?domain=boss.com.az&sz=128" group-title="Radio | Musiqi",Caspian Business Radio BOSS
+https://myradio24.org/bosscomaz
+#EXTINF:-1 tvg-id="RadioEnerji.az" tvg-logo="https://www.google.com/s2/favicons?domain=livetv.az&sz=128" group-title="Radio | Musiqi",Radio Enerji 101.1 FM
+https://icecast.livetv.az/antennfm
+#EXTINF:-1 tvg-id="PlanetFM.az" tvg-logo="https://www.google.com/s2/favicons?domain=dinle.az&sz=128" group-title="Radio | Musiqi",Planet FM 88.7
+https://live.dinle.az/planetfm
+#EXTINF:-1 tvg-id="XezerFM.az" tvg-logo="https://www.google.com/s2/favicons?domain=myradiostream.com&sz=128" group-title="Radio | Musiqi",Xəzər FM
+https://s40.myradiostream.com/:22546/listen.mp3?
+#EXTINF:-1 tvg-id="1063FM.az" tvg-logo="https://www.google.com/s2/favicons?domain=atv.az&sz=128" group-title="Radio | Milli",106.3 FM
+https://audiostr.atv.az/106.3fm
