@@ -697,16 +697,19 @@ class MainActivity : Activity() {
 
         val query = searchBox.text.toString().trim().lowercase()
         val saved = favorites.getStringSet("favorites", emptySet()) ?: emptySet()
+        val recent = favorites.getString("recent_order", "").orEmpty().split('|').filter { it.isNotBlank() }.toSet()
         val rows: List<Pair<String, View>> = if (isTv) {
             channels.filter { item ->
                 (selectedCategory == "Hamısı" || item.category == selectedCategory) &&
                     (!favoritesOnly || saved.contains("TV_" + item.code)) &&
+                    (!recentOnly || recent.contains("TV_" + item.code)) &&
                     (item.name.lowercase().contains(query) || item.category.lowercase().contains(query))
             }.map { item -> item.code to tvCard(item) }
         } else {
             radios.filter { item ->
                 (selectedCategory == "Hamısı" || item.genre == selectedCategory) &&
                     (!favoritesOnly || saved.contains("RADIO_" + item.code)) &&
+                    (!recentOnly || recent.contains("RADIO_" + item.code)) &&
                     (item.name.lowercase().contains(query) || item.genre.lowercase().contains(query))
             }.map { item -> item.code to radioCard(item) }
         }
@@ -743,6 +746,8 @@ class MainActivity : Activity() {
                 setPadding(dp(14), dp(9), dp(14), dp(9))
                 setOnClickListener {
                     selectedCategory = category
+                    favoritesOnly = false
+                    recentOnly = false
                     renderItems()
                 }
             }
@@ -764,6 +769,20 @@ class MainActivity : Activity() {
             }
         }
         filterRow.addView(fav)
+
+        val recentSelected = recentOnly
+        val recentChip = label("Son baxılanlar", 11f,
+            if (recentSelected) Color.rgb(5, 25, 33) else textMuted, true).apply {
+            background = rounded(if (recentSelected) accent else panel, 30)
+            applySvgIcon(this, "history", if (recentSelected) Color.rgb(5, 25, 33) else textMuted, 15)
+            setPadding(dp(14), dp(9), dp(14), dp(9))
+            setOnClickListener {
+                recentOnly = !recentOnly
+                favoritesOnly = false
+                renderItems()
+            }
+        }
+        filterRow.addView(recentChip)
     }
 
     private fun tvCard(channel: TvChannel): View = mediaCard(
@@ -1414,6 +1433,13 @@ class MainActivity : Activity() {
             else -> "Ölçü: FIT"
         }
         applySvgIcon(fitButton, "fit", textMain)
+    }
+
+    private fun rememberRecent(key: String) {
+        val current = favorites.getString("recent_order", "").orEmpty()
+            .split('|').filter { it.isNotBlank() }
+        val next = (listOf(key) + current.filterNot { it == key }).take(30)
+        favorites.edit().putString("recent_order", next.joinToString("|")).apply()
     }
 
     private fun toggleFavorite(key: String) {
