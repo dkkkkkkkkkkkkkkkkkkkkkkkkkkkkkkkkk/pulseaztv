@@ -11,7 +11,10 @@ import android.os.Build
 import android.os.IBinder
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
+import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 
 class PulsePlaybackService : Service() {
     inner class LocalBinder : Binder() {
@@ -24,7 +27,22 @@ class PulsePlaybackService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        player = ExoPlayer.Builder(this).build()
+        val httpFactory = DefaultHttpDataSource.Factory()
+            .setUserAgent("Mozilla/5.0 (Linux; Android 11) AppleWebKit/537.36 Chrome/130 Mobile Safari/537.36 PulseAZTV/1.7")
+            .setConnectTimeoutMs(12000)
+            .setReadTimeoutMs(22000)
+            .setAllowCrossProtocolRedirects(true)
+        val loadControl = DefaultLoadControl.Builder()
+            .setBufferDurationsMs(2500, 18000, 1000, 2500)
+            .build()
+        player = ExoPlayer.Builder(this)
+            .setLoadControl(loadControl)
+            .setMediaSourceFactory(DefaultMediaSourceFactory(httpFactory))
+            .build()
+        player.trackSelectionParameters = player.trackSelectionParameters
+            .buildUpon()
+            .setMaxVideoSize(3840, 2160)
+            .build()
         player.setAudioAttributes(
             AudioAttributes.Builder()
                 .setUsage(C.USAGE_MEDIA)
