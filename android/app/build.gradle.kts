@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "az.pulseaz.tv"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "az.pulseaz.tv"
