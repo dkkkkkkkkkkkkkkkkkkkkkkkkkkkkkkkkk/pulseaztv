@@ -138,19 +138,19 @@ class MainActivity : Activity() {
         "AZTV" to listOf(
             "https://yodaplayer.yodacdn.net/aztvpop/index.php",
             "https://aztv.az/az",
-            "https://operativmm.az/az/canli-tv/aztv",
+            "https://operativmm.az/en/canli-tv/aztv",
             "https://tvstream.az/"
         ),
         "MEDEN" to listOf(
             "https://yodaplayer.yodacdn.net/medeniyyetpop/index.php",
             "https://www.medeniyyettv.az/az",
-            "https://operativmm.az/az/canli-tv/medeniyyet"
+            "https://operativmm.az/en/canli-tv/medeniyyet"
         ),
         "NTV" to listOf(
             "https://live.ntv.az/",
             "https://yodaplayer.yodacdn.net/ntvpop/index.php",
             "https://www.ntv.az/",
-            "https://operativmm.az/az/canli-tv/naxcivan-tv"
+            "https://operativmm.az/en/canli-tv/naxcivan-tv"
         ),
         "ANEWZ" to listOf(
             "https://cdn.maksnet.tv/em/cubesanewz-secure/?abr-app=web&streamname=live",
@@ -160,7 +160,7 @@ class MainActivity : Activity() {
         "XEZER" to listOf(
             "https://xezerxeber.az/en/live",
             "https://www.xezerxeber.az/stream/index.m3u8",
-            "https://operativmm.az/az/canli-tv/xezer-tv",
+            "https://operativmm.az/en/canli-tv/xezer-tv",
             "https://tvstream.az/"
         )
     )
@@ -1109,6 +1109,23 @@ class MainActivity : Activity() {
                   .replace(/ş/g,'s').replace(/ö/g,'o').replace(/ü/g,'u')
                   .replace(/ğ/g,'g').replace(/[^a-z0-9]+/g,' ').trim();
               }
+              // Some channel detail pages link onward to the broadcaster's official live player.
+              try {
+                if (String(location.hostname || '').indexOf('operativmm.az') >= 0 &&
+                    !window.__pulseazOfficialLinkClicked) {
+                  var links = document.querySelectorAll('a,button,[role="button"]');
+                  for (var k=0; k<links.length; k++) {
+                    var linkText = norm((links[k].innerText || '') + ' ' +
+                      (links[k].getAttribute('aria-label') || '') + ' ' +
+                      (links[k].getAttribute('title') || ''));
+                    if (/watch on the official site|official site|resmi saytda|kanalin saytinda/.test(linkText)) {
+                      links[k].click();
+                      window.__pulseazOfficialLinkClicked = true;
+                      break;
+                    }
+                  }
+                }
+              } catch(e) {}
               // If a provider page lists several channels, choose the channel selected in PulseAZ.
               try {
                 if (!window.__pulseazChannelSelected && desiredNames.length) {
