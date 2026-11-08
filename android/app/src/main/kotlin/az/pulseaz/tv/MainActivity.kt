@@ -510,13 +510,14 @@ class MainActivity : Activity() {
         controls.addView(fitButton, fitParams)
         column.addView(controls)
 
-        sourceButton = action("Mənbə seç", panelRaised, accent).apply {
-            setOnClickListener { showSourceDialog() }
+        guideButton = action("Proqram bələdçisi", panelRaised, accentBlue).apply {
+            visibility = View.GONE
+            setOnClickListener { showProgramGuide() }
         }
-        val sourceParams = LinearLayout.LayoutParams(
+        val guideParams = LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, dp(42)
         ).apply { topMargin = dp(6) }
-        column.addView(sourceButton, sourceParams)
+        column.addView(guideButton, guideParams)
 
         val volumeRow = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -848,39 +849,6 @@ class MainActivity : Activity() {
         return card
     }
 
-    private fun showSourceDialog() {
-        val channel = selectedChannel ?: run {
-            Toast.makeText(this, "Əvvəl TV kanalı seç.", Toast.LENGTH_SHORT).show()
-            return
-        }
-        val pages = resolverPages[channel.code].orEmpty()
-        if (pages.isEmpty()) {
-            Toast.makeText(this, "Bu kanal üçün əlavə player səhifəsi yoxdur.", Toast.LENGTH_SHORT).show()
-            return
-        }
-        val labels = pages.mapIndexed { index, page ->
-            val host = Uri.parse(page).host ?: page
-            (index + 1).toString() + ". " + host
-        }.toTypedArray()
-        AlertDialog.Builder(this)
-            .setTitle(channel.name + " · yayım mənbələri")
-            .setItems(labels) { _, index ->
-                cancelStreamResolver()
-                activeStreamIndex = activeStreams.lastIndex
-                pageResolutionAttempted = index
-                pageResolutionInProgress = false
-                streamReferer = null
-                streamRequestHeaders = emptyMap()
-                lastPlaybackError = null
-                statusText.setTextColor(textMuted)
-                statusText.text = labels[index] + " yoxlanılır…"
-                emptyPlayerHint.visibility = View.GONE
-                tryNextSource()
-            }
-            .setNegativeButton("Bağla", null)
-            .show()
-    }
-
     private fun setPlayerVolume(requested: Float) {
         val volume = requested.coerceIn(0f, 1f)
         player?.volume = volume
@@ -910,14 +878,16 @@ class MainActivity : Activity() {
         statusText.setTextColor(textMuted)
         selectedChannel = channel
         selectedRadio = null
+        recentOnly = false
+        favoritesOnly = false
         titleText.text = channel.name
         audioPanel.visibility = View.GONE
         playerView.visibility = View.VISIBLE
         qualityButton.visibility = View.VISIBLE
         emptyPlayerHint.visibility = View.GONE
         liveBadge.text = "●  TV CANLI"
-        sourceButton.visibility = View.VISIBLE
-        sourceButton.text = "Mənbələr · " + resolverPages[channel.code].orEmpty().size + " sayt"
+        guideButton.visibility = if (channel.guideUrl.isNullOrBlank()) View.GONE else View.VISIBLE
+        rememberRecent("TV_" + channel.code)
         statusText.text = "Yayım bağlantısı yoxlanılır…"
         startStream(channel.streams, false)
     }
@@ -927,6 +897,8 @@ class MainActivity : Activity() {
         audioAnimations.forEach { it.start() }
         selectedRadio = station
         selectedChannel = null
+        recentOnly = false
+        favoritesOnly = false
         titleText.text = station.name
         audioTitle.text = station.name
         audioPanel.visibility = View.VISIBLE
@@ -934,7 +906,8 @@ class MainActivity : Activity() {
         emptyPlayerHint.visibility = View.GONE
         qualityButton.visibility = View.GONE
         liveBadge.text = "●  RADIO CANLI"
-        sourceButton.visibility = View.GONE
+        guideButton.visibility = View.GONE
+        rememberRecent("RADIO_" + station.code)
         statusText.text = "Radio bağlantısı yoxlanılır…"
         startStream(station.streams, true)
     }
@@ -1067,7 +1040,8 @@ class MainActivity : Activity() {
         }
 
         val code = selectedChannel?.code ?: selectedRadio?.code ?: return showStreamError()
-        val pages = resolverPages[code].orEmpty()
+        val pages = (selectedChannel?.pages ?: selectedRadio?.pages ?: emptyList()) +
+            resolverPages[code].orEmpty()
         if (pageResolutionInProgress) return
         val page = pages.getOrNull(pageResolutionAttempted)
         if (page == null) {
