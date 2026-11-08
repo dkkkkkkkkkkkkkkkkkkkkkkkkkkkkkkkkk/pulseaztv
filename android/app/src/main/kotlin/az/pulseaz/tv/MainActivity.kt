@@ -246,7 +246,7 @@ class MainActivity : Activity() {
         buildScreen()
 
         val httpFactory = DefaultHttpDataSource.Factory()
-            .setUserAgent("Mozilla/5.0 (Linux; Android 11) AppleWebKit/537.36 Chrome/120 Mobile Safari/537.36 PulseAZTV/1.2")
+            .setUserAgent("Mozilla/5.0 (Linux; Android 11) AppleWebKit/537.36 Chrome/120 Mobile Safari/537.36 PulseAZTV/1.3")
             .setConnectTimeoutMs(9000)
             .setReadTimeoutMs(16000)
             .setAllowCrossProtocolRedirects(true)
@@ -819,7 +819,7 @@ class MainActivity : Activity() {
             }
 
             val sourceFactory = DefaultHttpDataSource.Factory()
-                .setUserAgent("Mozilla/5.0 (Linux; Android 11) AppleWebKit/537.36 Chrome/120 Mobile Safari/537.36 PulseAZTV/1.2")
+                .setUserAgent("Mozilla/5.0 (Linux; Android 11) AppleWebKit/537.36 Chrome/120 Mobile Safari/537.36 PulseAZTV/1.3")
                 .setConnectTimeoutMs(9000)
                 .setReadTimeoutMs(16000)
                 .setAllowCrossProtocolRedirects(true)
@@ -1003,7 +1003,7 @@ class MainActivity : Activity() {
         if (!value.startsWith("https://", ignoreCase = true)) return false
         val parsed = runCatching { Uri.parse(value) }.getOrNull() ?: return false
         val target = (parsed.path.orEmpty() + "?" + parsed.query.orEmpty())
-        return Regex("""(?i)\\.m3u8(?:$|[?&#])""").containsMatchIn(target)
+        return Regex("""(?i)\.m3u8(?:$|[?&#])""").containsMatchIn(target)
     }
 
     private fun destroyResolverView() {
@@ -1037,6 +1037,10 @@ class MainActivity : Activity() {
     private fun retryCurrentSource() {
         val streams = activeStreams
         if (streams.isNotEmpty()) {
+            cancelStreamResolver()
+            pageResolutionAttempted = 0
+            pageResolutionInProgress = false
+            streamReferer = null
             activeStreamIndex = 0
             statusText.setTextColor(textMuted)
             statusText.text = "Yayım yenidən yoxlanılır…"
@@ -1124,7 +1128,7 @@ class MainActivity : Activity() {
                         connectTimeout = 4500
                         readTimeout = 4500
                         instanceFollowRedirects = true
-                        setRequestProperty("User-Agent", "Mozilla/5.0 PulseAZTV/1.2")
+                        setRequestProperty("User-Agent", "Mozilla/5.0 PulseAZTV/1.3")
                     }
                     if (connection.responseCode in 200..299) {
                         connection.inputStream.use { bitmap = BitmapFactory.decodeStream(it) }

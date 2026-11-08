@@ -2,7 +2,7 @@
 
 PulseAZ TV is a native Android player and directory for Azerbaijani television and radio streams.
 
-## Version 1.2
+## Version 1.3
 
 - Redesigned dark navy interface with teal/blue accents, rounded cards, animated list entrances and a live indicator.
 - Native AndroidX Media3 / ExoPlayer playback. Channel selection never opens a website or an external browser.
@@ -12,7 +12,7 @@ PulseAZ TV is a native Android player and directory for Azerbaijani television a
 - Player resize modes: FIT, ZOOM and FILL.
 - Radio playback for public direct HTTPS MP3/AAC/HLS URLs, with an animated audio visualizer.
 - SVG interface icons replace emoji/glyph placeholders; channel logos try multiple public icon sources with branded initials as a fallback.
-- On selected channels the native player can inspect official public page HTML (and its public player iframe) for an openly exposed HTTPS HLS URL, then play that URL in Media3. The webpage itself is never rendered in a WebView or opened in a browser.
+- On selected channels, an invisible Android WebView probes the broadcaster's official public player, captures only its open HTTPS `.m3u8` network request, and passes the URL to Media3. No webpage is displayed, no browser is launched, and the hidden probe is destroyed as soon as a stream is found or the timeout expires.
 - Referer/Origin headers are sent when needed by the public player. The app does not bypass DRM, sign-in, geo restrictions, tokens, or other access controls.
 - Adaptive buffer targets and bounded source discovery improve startup and recovery on unstable networks.
 - Portable TV + radio M3U playlist at `app/src/main/assets/pulseaz-az.m3u`.
@@ -34,4 +34,4 @@ The GitHub Actions workflow `.github/workflows/android-apk.yml` builds the debug
 3. Open the latest successful run.
 4. Download the **PulseAZ-TV-debug-apk** artifact and extract `app-debug.apk`.
 
-The project uses JDK 17, Gradle 8.13, Android Gradle Plugin 8.13.2, Kotlin 2.3.0, Android API 36 and AndroidX Media3 1.11.1. App version is 1.2.0.
+The project uses JDK 17, Gradle 8.13, Android Gradle Plugin 8.13.2, Kotlin 2.3.0, Android API 36 and AndroidX Media3 1.11.1. App version is 1.3.0. AzTV's paid Cinerama source and Kanal 35 have been removed.

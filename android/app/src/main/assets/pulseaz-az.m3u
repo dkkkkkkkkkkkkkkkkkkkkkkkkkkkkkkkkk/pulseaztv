@@ -1,13 +1,13 @@
 #EXTM3U
-# PulseAZ TV 1.2 — direct public media streams; the Android player can discover openly exposed HLS URLs from selected official pages.
+# PulseAZ TV 1.3 — public direct HLS candidates; native Android player also captures open HLS requests from invisible official-player pages.
 # TV candidates are listed in the community-maintained iptv-org Azerbaijan list:
 # https://github.com/iptv-org/iptv/blob/master/streams/az.m3u
 # Radio candidates are listed as direct HTTPS streams in the Azerbaijan station directory:
 # https://www.freqtrail.com/stations/AZ
-# The app never displays broadcaster webpages or opens a browser. Only publicly exposed HTTPS HLS is played.
+# Broadcaster webpages are never displayed. Their public player is probed invisibly and only an exposed HTTPS HLS URL is handed to Media3.
 # Links may change or be restricted by operators; availability is not guaranteed.
 
-#EXTINF:-1 tvg-id="AzTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=aztv.az&sz=128" group-title="TV | Xəbər",AzTV
+#EXTINF:-1 tvg-id="AzTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=aztv.az&sz=256" group-title="TV | Xəbər",AzTV
 https://str.yodacdn.net/azertv/index.m3u8
 #EXTINF:-1 tvg-id="BakuTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=baku.tv&sz=128" group-title="TV | Xəbər",Baku TV
 https://rtmp.baku.tv/hls/bakutv.m3u8
@@ -17,16 +17,20 @@ https://53be5ef2d13aa.streamlock.net/cubesanewz-secure/smil:cubesanewz-secure-we
 https://live.itv.az/itv.m3u8
 #EXTINF:-1 tvg-id="ELTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=eltv.az&sz=128" group-title="TV | Regional",EL TV
 https://live.eltv.az/live/eltv/playlist.m3u8
-#EXTINF:-1 tvg-id="Kanal35.az" tvg-logo="https://www.google.com/s2/favicons?domain=kanal35.az&sz=128" group-title="TV | Regional",Kanal 35
-https://str2.yodacdn.net/kanal35/index.m3u8
 #EXTINF:-1 tvg-id="KanalS.az" tvg-logo="https://www.google.com/s2/favicons?domain=kanals.az&sz=128" group-title="TV | Regional",Kanal S
 https://lives.atv.az:5443/KANAL-S/streams/kanals.m3u8
-#EXTINF:-1 tvg-id="MedeniyyetTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=aztv.az&sz=128" group-title="TV | Mədəniyyət",Mədəniyyət TV
+#EXTINF:-1 tvg-id="MedeniyyetTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=medeniyyettv.az&sz=256" group-title="TV | Mədəniyyət",Mədəniyyət TV
 https://str.yodacdn.net/medeniyyettele/index.m3u8
-#EXTINF:-1 tvg-id="NaxcivanTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=ntv.az&sz=128" group-title="TV | Regional",Naxçıvan TV
+#EXTINF:-1 tvg-id="MedeniyyetTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=medeniyyettv.az&sz=256" group-title="TV | Mədəniyyət",Mədəniyyət TV (alternative)
+https://streams.livetv.az/azerbaijan/medeniyyet_stream2/playlist.m3u8
+#EXTINF:-1 tvg-id="NaxcivanTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=ntv.az&sz=256" group-title="TV | Regional",Naxçıvan TV
 https://str2.yodacdn.net/ntv/video.m3u8
-#EXTINF:-1 tvg-id="XezerTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=xezerxeber.az&sz=128" group-title="TV | Əyləncə",Xəzər TV
+#EXTINF:-1 tvg-id="NaxcivanTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=ntv.az&sz=256" group-title="TV | Regional",Naxçıvan TV (alternative)
+https://streams.livetv.az/azerbaijan/nax/playlist.m3u8
+#EXTINF:-1 tvg-id="XezerTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=xezerxeber.az&sz=256" group-title="TV | Əyləncə",Xəzər TV
 https://www.xezerxeber.az/stream/index.m3u8
+#EXTINF:-1 tvg-id="XezerTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=xezerxeber.az&sz=256" group-title="TV | Əyləncə",Xəzər TV (alternative)
+https://xezerxeber.az/stream/main_stream.m3u8
 #EXTINF:-1 tvg-id="AyazTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=ayaztv.az&sz=128" group-title="TV | Musiqi",Ayaz TV
 https://janya-ayaztv.vgcdn.net/ptnr-WebApp/title-Ayaz_TV/v1/vglive-sk-934820/main.m3u8
 #EXTINF:-1 tvg-id="VilayetTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=livekadeh.com&sz=128" group-title="TV | Regional",Vilayət TV
