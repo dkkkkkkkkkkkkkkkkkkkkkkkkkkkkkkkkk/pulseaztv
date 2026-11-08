@@ -11,8 +11,8 @@ android {
         applicationId = "az.pulseaz.tv"
         minSdk = 24
         targetSdk = 35
-        versionCode = 6
-        versionName = "1.5.0"
+        versionCode = 7
+        versionName = "1.6.0"
     }
 
     compileOptions {
@@ -31,6 +31,7 @@ kotlin {
 dependencies {
     implementation("androidx.media3:media3-exoplayer:1.11.1")
     implementation("androidx.media3:media3-exoplayer-hls:1.11.1")
+    implementation("androidx.media3:media3-exoplayer-dash:1.11.1")
     implementation("androidx.media3:media3-ui:1.11.1")
     implementation("com.caverock:androidsvg-aar:1.4")
 }
