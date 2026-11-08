@@ -19,7 +19,7 @@ The GitHub Actions workflow `.github/workflows/android-apk.yml` builds the debug
 3. Open the latest successful run.
 4. Download the **PulseAZ-TV-debug-apk** artifact and extract `app-debug.apk`.
 
-The project uses JDK 17, Gradle 8.7, Android Gradle Plugin 8.6.1 and AndroidX Media3 1.11.1.
+The project uses JDK 17, Gradle 8.13, Android Gradle Plugin 8.13.2, Kotlin 2.3.0, Android API 36 and AndroidX Media3 1.11.1.
 
 ## Stream and rights note
 
