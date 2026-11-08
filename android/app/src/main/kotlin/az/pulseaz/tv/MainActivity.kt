@@ -90,6 +90,13 @@ private data class RadioStation(
     val logoFile: String? = null
 )
 
+private data class TvProgram(
+    val startMillis: Long,
+    val stopMillis: Long,
+    val title: String,
+    val description: String
+)
+
 class MainActivity : Activity() {
     private val bg = Color.rgb(5, 9, 19)
     private val panel = Color.rgb(13, 21, 38)
@@ -890,6 +897,121 @@ class MainActivity : Activity() {
         } else {
             setPlayerVolume(lastNonMutedVolume.coerceIn(0.1f, 1f))
         }
+    }
+
+    private fun parseXmlTvDate(value: String?): Long {
+        if (value.isNullOrBlank()) return 0L
+        val patterns = listOf("yyyyMMddHHmmss Z", "yyyyMMddHHmmss")
+        for (pattern in patterns) {
+            try {
+                val format = SimpleDateFormat(pattern, Locale.US).apply { isLenient = false }
+                val parsed = format.parse(value.trim())
+                if (parsed != null) return parsed.time
+            } catch (_: Exception) {
+                // Try the next XMLTV date pattern.
+            }
+        }
+        return 0L
+    }
+
+    private fun parseProgramGuide(input: java.io.InputStream): List<TvProgram> {
+        val parser = Xml.newPullParser()
+        parser.setInput(input, "UTF-8")
+        val result = mutableListOf<TvProgram>()
+        var start = 0L
+        var stop = 0L
+        var title = ""
+        var description = ""
+        while (parser.next() != org.xmlpull.v1.XmlPullParser.END_DOCUMENT) {
+            when (parser.eventType) {
+                org.xmlpull.v1.XmlPullParser.START_TAG -> when (parser.name) {
+                    "programme" -> {
+                        start = parseXmlTvDate(parser.getAttributeValue(null, "start"))
+                        stop = parseXmlTvDate(parser.getAttributeValue(null, "stop"))
+                        title = ""
+                        description = ""
+                    }
+                    "title" -> title = runCatching { parser.nextText().trim() }.getOrDefault(title)
+                    "desc" -> description = runCatching { parser.nextText().trim() }.getOrDefault(description)
+                }
+                org.xmlpull.v1.XmlPullParser.END_TAG -> if (parser.name == "programme") {
+                    if (start > 0L && title.isNotBlank()) {
+                        result.add(TvProgram(start, stop, title, description))
+                    }
+                }
+            }
+            if (result.size >= 2000) break
+        }
+        return result
+    }
+
+    private fun showProgramGuide() {
+        val channel = selectedChannel ?: return
+        val guideUrl = channel.guideUrl ?: return
+        statusText.text = "Proqram cədvəli yüklənir…"
+        Thread {
+            val connection = runCatching {
+                (URL(guideUrl).openConnection() as HttpURLConnection).apply {
+                    connectTimeout = 10000
+                    readTimeout = 15000
+                    instanceFollowRedirects = true
+                    setRequestProperty("User-Agent", "PulseAZTV/1.7 (Android)")
+                    setRequestProperty("Accept", "application/xml,text/xml,*/*")
+                }
+            }.getOrNull()
+            val programs = try {
+                if (connection == null || connection.responseCode !in 200..299) {
+                    emptyList()
+                } else {
+                    connection.inputStream.use { parseProgramGuide(it) }
+                }
+            } catch (_: Exception) {
+                emptyList()
+            } finally {
+                connection?.disconnect()
+            }
+            runOnUiThread {
+                if (isFinishing || isDestroyed || selectedChannel?.code != channel.code) return@runOnUiThread
+                statusText.text = "CANLI YAYIM · " + channel.name
+                if (programs.isEmpty()) {
+                    Toast.makeText(this, "Bu kanal üçün proqram cədvəli hazırda əlçatan deyil.", Toast.LENGTH_LONG).show()
+                    return@runOnUiThread
+                }
+                val cutoff = System.currentTimeMillis() - 15L * 24L * 60L * 60L * 1000L
+                val visible = programs.filter { it.stopMillis == 0L || it.stopMillis >= cutoff }
+                    .sortedBy { it.startMillis }
+                    .take(80)
+                val timeFormat = SimpleDateFormat("dd.MM  HH:mm", Locale.getDefault())
+                val labels = visible.map {
+                    timeFormat.format(Date(it.startMillis)) + "  ·  " + it.title
+                }.toTypedArray()
+                AlertDialog.Builder(this)
+                    .setTitle(channel.name + " · Proqramlar")
+                    .setItems(labels) { _, index ->
+                        val selected = visible[index]
+                        val detail = buildString {
+                            append(selected.title)
+                            append("\n\n")
+                            append(timeFormat.format(Date(selected.startMillis)))
+                            if (selected.stopMillis > selected.startMillis) {
+                                append(" – ")
+                                append(SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(selected.stopMillis)))
+                            }
+                            if (selected.description.isNotBlank()) {
+                                append("\n\n")
+                                append(selected.description)
+                            }
+                        }
+                        AlertDialog.Builder(this)
+                            .setTitle("Proqram məlumatı")
+                            .setMessage(detail)
+                            .setPositiveButton("Bağla", null)
+                            .show()
+                    }
+                    .setNegativeButton("Bağla", null)
+                    .show()
+            }
+        }.start()
     }
 
     private fun playChannel(channel: TvChannel) {
