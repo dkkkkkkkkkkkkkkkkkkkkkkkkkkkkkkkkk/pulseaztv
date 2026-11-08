@@ -12,7 +12,8 @@ PulseAZ TV is a native Android player and directory for Azerbaijani television a
 - Video track selection is capped at 3840×2160 (4K). The app can play 4K only if the selected source actually provides a 4K rendition and the phone can decode it; it does not manufacture or upscale real 4K detail from a lower-resolution source.
 - TV and Radio sections, category filters, search and locally saved favourites remain available. Azərbaycan Beynəlxalq Radiosu has been removed from the radio list as requested.
 - Updated high-resolution channel logo sources and a newly generated PulseAZ TV launcher/app logo.
-- Referrer/Origin/User-Agent request metadata is passed when exposed by the public player. Cookies are only reused for the exact stream URL.
+- Only Referrer/Origin/User-Agent metadata exposed by a public player is passed to Media3; browser session cookies are not forwarded to stream segments or other CDN hosts.
+- Small favicons below 96px are rejected instead of being enlarged and blurred; the app keeps its crisp channel-initial fallback when a high-resolution logo is unavailable.
 - HTTP failures (403, 404, 5xx) are shown in the player status. The app does not bypass DRM, sign-in, geo restrictions, paid subscriptions, signed-token rules or other access controls.
 - Redesigned dark navy interface with an ambient animated gradient, refined typography, animated channel cards, live badge and radio visualizer.
 - Portable TV + radio M3U playlist at `app/src/main/assets/pulseaz-az.m3u`.
