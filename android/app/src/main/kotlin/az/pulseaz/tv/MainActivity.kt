@@ -122,6 +122,7 @@ class MainActivity : Activity() {
     private lateinit var playPauseButton: TextView
     private lateinit var qualityButton: TextView
     private lateinit var fitButton: TextView
+    private lateinit var fullscreenButton: TextView
     private lateinit var retryButton: TextView
     private lateinit var muteButton: TextView
     private lateinit var volumeValueText: TextView
@@ -156,6 +157,7 @@ class MainActivity : Activity() {
     private var yodaTokenCache: String? = null
     private var yodaTokenExpiresAt = 0L
     private var resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+    private var immersiveEnabled = false
     private val animations = mutableListOf<Animator>()
     private val audioAnimations = mutableListOf<Animator>()
     private val logoCache = HashMap<String, Bitmap>()
@@ -328,7 +330,10 @@ class MainActivity : Activity() {
         activePlayer.setAudioAttributes(
             AudioAttributes.Builder()
                 .setUsage(C.USAGE_MEDIA)
-                .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
+                .setContentType(
+                    if (selectedRadio != null) C.AUDIO_CONTENT_TYPE_MUSIC
+                    else C.AUDIO_CONTENT_TYPE_MOVIE
+                )
                 .build(),
             true
         )
@@ -544,6 +549,11 @@ class MainActivity : Activity() {
         val fitParams = weightedButtonParams()
         fitParams.marginStart = dp(7)
         controls.addView(fitButton, fitParams)
+        fullscreenButton = action("Tam ekran", panelRaised, textMain).apply {
+            setOnClickListener { toggleImmersive() }
+        }
+        val fullscreenParams = weightedButtonParams().apply { marginStart = dp(7) }
+        controls.addView(fullscreenButton, fullscreenParams)
         column.addView(controls)
 
         guideButton = action("Proqram bələdçisi", panelRaised, accentBlue).apply {
@@ -631,6 +641,7 @@ class MainActivity : Activity() {
                 selectedTab = "tv"
                 selectedCategory = "Hamısı"
                 favoritesOnly = false
+                recentOnly = false
                 renderItems()
             }
         }
@@ -642,6 +653,7 @@ class MainActivity : Activity() {
                 selectedTab = "radio"
                 selectedCategory = "Hamısı"
                 favoritesOnly = false
+                recentOnly = false
                 renderItems()
             }
         }
@@ -1006,8 +1018,8 @@ class MainActivity : Activity() {
                     Toast.makeText(this, "Bu kanal üçün proqram cədvəli hazırda əlçatan deyil.", Toast.LENGTH_LONG).show()
                     return@runOnUiThread
                 }
-                val cutoff = System.currentTimeMillis() - 15L * 24L * 60L * 60L * 1000L
-                val visible = programs.filter { it.stopMillis == 0L || it.stopMillis >= cutoff }
+                val now = System.currentTimeMillis()
+                val visible = programs.filter { it.stopMillis == 0L || it.stopMillis >= now }
                     .sortedBy { it.startMillis }
                     .take(80)
                 val timeFormat = SimpleDateFormat("dd.MM  HH:mm", Locale.getDefault())
@@ -1755,6 +1767,31 @@ class MainActivity : Activity() {
             .setShowDisableOption(false)
             .build()
             .show()
+    }
+
+    private fun toggleImmersive() {
+        immersiveEnabled = !immersiveEnabled
+        applyImmersiveMode()
+        fullscreenButton.text = if (immersiveEnabled) "Tam ekrandan çıx" else "Tam ekran"
+    }
+
+    private fun applyImmersiveMode() {
+        val flags = if (immersiveEnabled) {
+            View.SYSTEM_UI_FLAG_FULLSCREEN or
+                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
+                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+        } else {
+            View.SYSTEM_UI_FLAG_VISIBLE
+        }
+        window.decorView.systemUiVisibility = flags
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus && immersiveEnabled) applyImmersiveMode()
     }
 
     private fun cycleResizeMode() {
