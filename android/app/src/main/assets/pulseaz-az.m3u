@@ -1,5 +1,5 @@
 #EXTM3U
-# PulseAZ TV 1.5 — public HLS candidates plus active discovery from invisible official players.
+# PulseAZ TV 1.6 — public HLS/DASH candidates plus active discovery from invisible official and provider players.
 # The hidden probe can start a muted webpage player after the user selects a channel; playback remains native.
 # TV candidates are listed in the community-maintained iptv-org Azerbaijan list:
 # https://github.com/iptv-org/iptv/blob/master/streams/az.m3u
