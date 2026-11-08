@@ -305,13 +305,29 @@ class MainActivity : Activity() {
             val service = (binder as? PulsePlaybackService.LocalBinder)?.getService() ?: return
             playbackService = service
             player = service.player
+            if (selectedChannel == null && selectedRadio == null &&
+                service.currentStationCode.isNotBlank()) {
+                radios.firstOrNull { it.code == service.currentStationCode }?.let { station ->
+                    selectedRadio = station
+                    selectedTab = "radio"
+                    titleText.text = station.name
+                    audioTitle.text = station.name
+                    audioPanel.visibility = View.VISIBLE
+                    playerView.visibility = View.GONE
+                    qualityButton.visibility = View.GONE
+                    guideButton.visibility = View.GONE
+                    liveBadge.text = "●  RADIO CANLI"
+                }
+            }
             configurePlayer(player ?: return)
             playerView.player = player
             attachPlayerListener(player ?: return)
 
-            // A channel may have been tapped while the service was still starting.
-            selectedChannel?.let { startStream(it.streams, false) }
-                ?: selectedRadio?.let { startStream(it.streams, true) }
+            // Resume the selected media only when the service has no existing item.
+            if ((player?.mediaItemCount ?: 0) == 0) {
+                selectedChannel?.let { startStream(it.streams, false) }
+                    ?: selectedRadio?.let { startStream(it.streams, true) }
+            }
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
@@ -1076,9 +1092,10 @@ class MainActivity : Activity() {
         startStream(channel.streams, false)
     }
 
-    private fun startRadioForeground(station: String) {
+    private fun startRadioForeground(station: RadioStation) {
         val intent = Intent(this, PulsePlaybackService::class.java)
-            .putExtra(PulsePlaybackService.EXTRA_STATION, station)
+            .putExtra(PulsePlaybackService.EXTRA_STATION, station.name)
+            .putExtra(PulsePlaybackService.EXTRA_STATION_CODE, station.code)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(intent)
         } else {
@@ -1103,7 +1120,7 @@ class MainActivity : Activity() {
         liveBadge.text = "●  RADIO CANLI"
         guideButton.visibility = View.GONE
         rememberRecent("RADIO_" + station.code)
-        startRadioForeground(station.name)
+        startRadioForeground(station)
         statusText.text = "Radio bağlantısı yoxlanılır…"
         startStream(station.streams, true)
     }
@@ -1745,7 +1762,7 @@ class MainActivity : Activity() {
         if (activePlayer.isPlaying) {
             activePlayer.pause()
         } else {
-            selectedRadio?.let { startRadioForeground(it.name) }
+            selectedRadio?.let { startRadioForeground(it) }
             activePlayer.play()
         }
     }
