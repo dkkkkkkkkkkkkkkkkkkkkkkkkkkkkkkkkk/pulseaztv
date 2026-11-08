@@ -1,10 +1,11 @@
 #EXTM3U
-# PulseAZ TV 1.1 — direct media streams only.
+# PulseAZ TV 1.2 — direct public media streams; the Android player can discover openly exposed HLS URLs from selected official pages.
 # TV candidates are listed in the community-maintained iptv-org Azerbaijan list:
 # https://github.com/iptv-org/iptv/blob/master/streams/az.m3u
 # Radio candidates are listed as direct HTTPS streams in the Azerbaijan station directory:
 # https://www.freqtrail.com/stations/AZ
-# Links may be changed or restricted by their operators; availability is not guaranteed.
+# The app never displays broadcaster webpages or opens a browser. Only publicly exposed HTTPS HLS is played.
+# Links may change or be restricted by operators; availability is not guaranteed.
 
 #EXTINF:-1 tvg-id="AzTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=aztv.az&sz=128" group-title="TV | Xəbər",AzTV
 https://str.yodacdn.net/azertv/index.m3u8
@@ -33,7 +34,7 @@ https://nl.livekadeh.com/hls2/vilayet.m3u8
 
 #EXTINF:-1 tvg-id="IctimaiRadio.az" tvg-logo="https://www.google.com/s2/favicons?domain=itv.az&sz=128" group-title="Radio | Xəbər",İctimai Radio 90 FM
 https://stream.itv.az/rtmp:/radio/playlist.m3u8
-#EXTINF:-1 tvg-id="AzerbaijanInternationalRadio.az" tvg-logo="https://www.google.com/s2/favicons?domain=aztv.az&sz=128" group-title="Radio | Milli",Azərbaycan Beynəlxalq Radiosu
+#EXTINF:-1 tvg-id="AzerbaijanInternationalRadio.az" tvg-logo="https://www.google.com/s2/favicons?domain=internationalradio.az&sz=256" group-title="Radio | Milli",Azərbaycan Beynəlxalq Radiosu
 https://str.yodacdn.net/radio_int/tracks-a1/mono.m3u8
 #EXTINF:-1 tvg-id="ArazFM.az" tvg-logo="https://www.google.com/s2/favicons?domain=arazfm.az&sz=128" group-title="Radio | Musiqi",Araz FM 103.3
 https://s14.myradiostream.com/30454/listen.mp3
