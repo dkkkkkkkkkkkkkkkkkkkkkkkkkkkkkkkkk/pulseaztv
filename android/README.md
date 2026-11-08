@@ -16,7 +16,7 @@ PulseAZ TV is a native Android player and directory for Azerbaijani television a
 - The resolver polls for delayed iframe/player initialization, attempts muted HTML5/JWPlayer/Video.js playback only after the user selects a channel, then captures its publicly requested HLS URL and Referer/Origin/User-Agent metadata. It reuses only cookies scoped to the exact stream URL.
 - Some official players wait for an explicit play action before requesting HLS; the hidden probe now triggers that action in the page engine while keeping all page content invisible and the native Media3 player as the only visible video surface.
 - Common HTTP failures (403, 404, 5xx) are explained in the player status. The app tests alternative sources and remembers successful non-expiring URLs per channel.
-- Logo float, live-badge pulse/scale, typography refinement, card entrance motion and the radio equalizer add subtle visual effects.
+- Slow animated ambient gradient background, floating logo, pulsing live badge, refined sans-serif typography, animated channel-card entrances and a radio equalizer add subtle visual effects.
 - Referer/Origin headers are sent when needed by the public player. The app does not bypass DRM, sign-in, geo restrictions, tokens, or other access controls.
 - Adaptive buffer targets and bounded source discovery improve startup and recovery on unstable networks.
 - Portable TV + radio M3U playlist at `app/src/main/assets/pulseaz-az.m3u`.
