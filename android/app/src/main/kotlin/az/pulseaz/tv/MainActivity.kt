@@ -485,6 +485,7 @@ class MainActivity : Activity() {
             setPadding(dp(15), dp(2), dp(15), dp(2))
             background = rounded(panel, 14)
         }
+        applySvgIcon(searchBox, "search", textMuted, 18)
         val searchParams = LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, dp(49)
         )
@@ -829,8 +830,10 @@ class MainActivity : Activity() {
         statusText.text = "Rəsmi səhifədə açıq HLS yayımı axtarılır…"
         resolveHlsFromPage(page) { streamUrl, referer ->
             runOnUiThread {
-                pageResolutionInProgress = false
                 if (isFinishing || isDestroyed) return@runOnUiThread
+                val stillSelected = selectedChannel?.code == code || selectedRadio?.code == code
+                if (!stillSelected) return@runOnUiThread
+                pageResolutionInProgress = false
                 if (!streamUrl.isNullOrBlank()) {
                     streamReferer = referer ?: page
                     activeStreams = activeStreams + streamUrl
