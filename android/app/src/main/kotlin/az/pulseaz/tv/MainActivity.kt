@@ -209,7 +209,7 @@ class MainActivity : Activity() {
         val radio = mutableListOf<RadioStation>()
         assets.open("channel_catalog.psv").bufferedReader(Charsets.UTF_8).useLines { lines ->
             lines.filter { it.isNotBlank() }.forEach { line ->
-                val fields = line.split('|', limit = 9)
+                val fields = line.split('|', limit = 10)
                 if (fields.size < 10) return@forEach
                 val kind = fields[0].trim()
                 val id = fields[1].trim()
