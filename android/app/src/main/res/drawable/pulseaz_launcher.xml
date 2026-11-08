@@ -19,7 +19,7 @@
         android:strokeLineCap="round"
         android:pathData="M40,9 L52,22 L64,9" />
     <circle android:fillColor="#157EFF" android:centerX="40" android:centerY="9" android:radius="3.4dp" />
-    <circle android:fillColor="#157EFF" android:centerX="64" android:centerY="9" android:radius="3.4" />
+    <circle android:fillColor="#157EFF" android:centerX="64" android:centerY="9" android:radius="3.4dp" />
 
     <path
         android:fillColor="#087BDA"
