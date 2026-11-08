@@ -113,10 +113,10 @@ class MainActivity : Activity() {
     private val resolverPages = mapOf(
         "AZTV" to listOf("https://aztv.az/az"),
         "MEDEN" to listOf("https://medeniyyettv.az/az"),
-        "NTV" to listOf("https://yoda.az/tv/ntv/"),
+        "NTV" to listOf("https://live.ntv.az/", "https://www.ntv.az/", "https://yoda.az/tv/ntv/"),
         "K35" to listOf("https://yoda.az/tv/kanal35/"),
         "ANEWZ" to listOf("https://anewz.tv/"),
-        "XEZER" to listOf("https://xezerxeber.az/en/live", "https://yoda.az/tv/xazartv/"),
+        "XEZER" to listOf("https://tvstream.az/", "https://xezerxeber.az/en/live", "https://yoda.az/tv/xazartv/"),
         "AZINT" to listOf("https://internationalradio.az/az")
     )
     private val favorites by lazy { getSharedPreferences("pulseaz_tv", MODE_PRIVATE) }
@@ -131,7 +131,7 @@ class MainActivity : Activity() {
         ), "https://www.google.com/s2/favicons?domain=baku.tv&sz=128", "Canlı yayım"),
         TvChannel("AnewZ", "ANEWZ", "Xəbər", listOf(
             "https://53be5ef2d13aa.streamlock.net/cubesanewz-secure/smil:cubesanewz-secure-web.smil/playlist.m3u8"
-        ), "https://www.google.com/s2/favicons?domain=anewz.tv&sz=256", "Rəsmi səhifədən HLS yoxlanılır"),
+        ), "https://xalqqazeti.az/uploads/news/116512/1_1_f.png", "Rəsmi səhifədən HLS yoxlanılır"),
         TvChannel("İctimai TV", "ITV", "Xəbər", listOf(
             "https://live.itv.az/itv.m3u8"
         ), "https://www.google.com/s2/favicons?domain=itv.az&sz=128", "Canlı yayım"),
@@ -147,13 +147,13 @@ class MainActivity : Activity() {
         TvChannel("Mədəniyyət TV", "MEDEN", "Mədəniyyət", listOf(
             "https://str.yodacdn.net/medeniyyettele/index.m3u8",
             "https://str.yodacdn.net/medeniyyet/index.m3u8"
-        ), "https://www.google.com/s2/favicons?domain=medeniyyettv.az&sz=256", "Açıq HLS mənbələri yoxlanılır"),
+        ), "https://upload.wikimedia.org/wikipedia/commons/f/fc/M%C9%99d%C9%99niyy%C9%99t_TV_logo.png", "Açıq HLS mənbələri yoxlanılır"),
         TvChannel("Naxçıvan TV", "NTV", "Regional", listOf(
             "https://str2.yodacdn.net/ntv/video.m3u8"
-        ), "https://www.google.com/s2/favicons?domain=ntv.az&sz=256", "Açıq HLS mənbə yoxlanılır"),
+        ), "https://upload.wikimedia.org/wikipedia/commons/f/fa/Nax%C3%A7%C4%B1van_TV_%282025%29.png", "Rəsmi canlı səhifədən HLS yoxlanılır"),
         TvChannel("Xəzər TV", "XEZER", "Əyləncə", listOf(
             "https://www.xezerxeber.az/stream/index.m3u8"
-        ), "https://www.google.com/s2/favicons?domain=xezerxeber.az&sz=128", "720p mənbə kimi siyahılanıb"),
+        ), "https://upload.wikimedia.org/wikipedia/en/9/97/X%C9%99z%C9%99r_TV_Logo.png", "Rəsmi və alternativ canlı səhifələr yoxlanılır"),
         TvChannel("Ayaz TV", "AYAZ", "Musiqi", listOf(
             "https://janya-ayaztv.vgcdn.net/ptnr-WebApp/title-Ayaz_TV/v1/vglive-sk-934820/main.m3u8"
         ), "https://www.google.com/s2/favicons?domain=ayaztv.az&sz=128", "720p mənbə kimi siyahılanıb"),
