@@ -479,6 +479,58 @@ class MainActivity : Activity() {
         controls.addView(fitButton, fitParams)
         column.addView(controls)
 
+        sourceButton = action("Mənbə seç", panelRaised, accent).apply {
+            setOnClickListener { showSourceDialog() }
+        }
+        val sourceParams = LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, dp(42)
+        ).apply { topMargin = dp(6) }
+        column.addView(sourceButton, sourceParams)
+
+        val volumeRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(0, dp(7), 0, dp(9))
+        }
+        volumeRow.addView(label("SƏS", 10f, textMuted, true), LinearLayout.LayoutParams(dp(34), dp(42)))
+        val volumeDown = action("−", panelRaised, textMain).apply {
+            setOnClickListener { setPlayerVolume((player?.volume ?: 1f) - 0.1f) }
+        }
+        volumeRow.addView(volumeDown, LinearLayout.LayoutParams(dp(34), dp(40)))
+        volumeSlider = SeekBar(this).apply {
+            max = 100
+            progress = 100
+            setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                    if (fromUser) setPlayerVolume(progress / 100f)
+                }
+                override fun onStartTrackingTouch(seekBar: SeekBar?) = Unit
+                override fun onStopTrackingTouch(seekBar: SeekBar?) = Unit
+            })
+        }
+        val sliderParams = LinearLayout.LayoutParams(0, dp(40), 1f).apply {
+            marginStart = dp(5)
+            marginEnd = dp(5)
+        }
+        volumeRow.addView(volumeSlider, sliderParams)
+        val volumeUp = action("+", panelRaised, textMain).apply {
+            setOnClickListener { setPlayerVolume((player?.volume ?: 1f) + 0.1f) }
+        }
+        volumeRow.addView(volumeUp, LinearLayout.LayoutParams(dp(34), dp(40)))
+        muteButton = action("Mute", panelRaised, accent).apply {
+            setOnClickListener { toggleMute() }
+        }
+        val muteParams = LinearLayout.LayoutParams(dp(58), dp(40)).apply { marginStart = dp(6) }
+        volumeRow.addView(muteButton, muteParams)
+        volumeValueText = label("100%", 10f, textMuted, true).apply {
+            gravity = Gravity.END or Gravity.CENTER_VERTICAL
+        }
+        val volumeValueParams = LinearLayout.LayoutParams(dp(39), dp(40)).apply {
+            marginStart = dp(4)
+        }
+        volumeRow.addView(volumeValueText, volumeValueParams)
+        column.addView(volumeRow)
+
         val playbackControls = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
@@ -776,6 +828,8 @@ class MainActivity : Activity() {
         qualityButton.visibility = View.VISIBLE
         emptyPlayerHint.visibility = View.GONE
         liveBadge.text = "●  TV CANLI"
+        sourceButton.visibility = View.VISIBLE
+        sourceButton.text = "Mənbələr · " + resolverPages[channel.code].orEmpty().size + " sayt"
         statusText.text = "Yayım bağlantısı yoxlanılır…"
         startStream(channel.streams, false)
     }
@@ -792,6 +846,7 @@ class MainActivity : Activity() {
         emptyPlayerHint.visibility = View.GONE
         qualityButton.visibility = View.GONE
         liveBadge.text = "●  RADIO CANLI"
+        sourceButton.visibility = View.GONE
         statusText.text = "Radio bağlantısı yoxlanılır…"
         startStream(station.streams, true)
     }
