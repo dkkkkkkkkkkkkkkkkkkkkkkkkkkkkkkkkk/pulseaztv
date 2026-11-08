@@ -220,7 +220,7 @@ class MainActivity : Activity() {
             setHintTextColor(Color.rgb(116, 136, 160))
             setTextColor(white)
             textSize = 14f
-            singleLine = true
+            isSingleLine = true
             imeOptions = EditorInfo.IME_ACTION_SEARCH
             setPadding(dp(14), 0, dp(14), 0)
             background = rounded(panel, 12)
