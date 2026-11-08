@@ -1,74 +1,74 @@
-tv|biznestv|BIZNES TV|Biznes|https://str.yodacdn.net/biznestv/video.m3u8~https://str.yodacdn.net/biznestv/index.m3u8~https://str1.yodacdn.net/biznestv/video.m3u8||https://azepg.ddns.net/aztv/15_days_archive__biznestv_desc.xml|biznestv.az|biznestv.png
-tv|o-ayaz|Ayaz TV|Musiqi|https://janya-ayaztv.vgcdn.net/ptnr-WebApp/title-Ayaz_TV/v1/vglive-sk-934820/main.m3u8|https://api.mediabay.tv/v2/channels/thread/721||ayaztv.az|ayaz.png
-tv|o-diginet|Diginet|Musiqi|https://a8.radyotelekom.com.tr:3276/stream/play.m3u8||||diginet.png
-tv|o-kn|KN Music TV|Musiqi|https://cdn4.yayin.com.tr/kntv/index.m3u8||||knmusic.jpg
-tv|o-konul|Konul TV|Musiqi||https://api.mediabay.tv/v2/channels/thread/715|||konul.png
-tv|o-konulmusic|Konul TV Music|Musiqi||https://api.mediabay.tv/v2/channels/thread/716|||konulmusic.png
-tv|o-mahni|Mahnı TV|Musiqi|https://mahnitvonline.xyz/mahnitv/index.m3u8||||mahni.png
-tv|o-max|Max Music TV|Musiqi|https://cdn4.yayin.com.tr/maxtv/index.m3u8||||maxmusic.jpg
-tv|o-azmusic|Music Azerbaijan HD|Musiqi||https://api.mediabay.tv/v2/channels/thread/717|||azmusic.jpg
-tv|o-showplus|Show Plus|Musiqi|https://rtmp.showplus.tv/hls/myshow.m3u8||||showplus.png
-tv|tmbtr|TMB TV|Musiqi|https://str.yodacdn.net/tmbtr/video.m3u8~https://str.yodacdn.net/tmbtr/index.m3u8~https://str1.yodacdn.net/tmbtr/video.m3u8|||tmb.az|tmb.png
-tv|medeniyyettele|Mədəniyyət|Mədəniyyət|https://str.yodacdn.net/medeniyyettele/video.m3u8~https://str.yodacdn.net/medeniyyettele/index.m3u8~https://str1.yodacdn.net/medeniyyettele/video.m3u8~https://str.yodacdn.net/medeniyyet/index.m3u8~https://streams.livetv.az/azerbaijan/medeniyyet_stream2/playlist.m3u8|https://canlitv.you/player/index.php?id=12029&mobile=0~https://yodaplayer.yodacdn.net/medeniyyetpop/index.php~https://www.medeniyyettv.az/az~https://operativmm.az/en/canli-tv/medeniyyet|https://azepg.ddns.net/aztv/15_days_archive__madaniyyet_desc.xml|medeniyyettv.az|medeniyyet.png
-tv|eltv|ELTV|Regional|https://str.yodacdn.net/eltv/video.m3u8~https://str.yodacdn.net/eltv/index.m3u8~https://str1.yodacdn.net/eltv/video.m3u8~https://live.eltv.az/live/eltv/playlist.m3u8||https://azepg.ddns.net/aztv/15_days_archive__eltv_desc.xml|eltv.az|eltv_logo.png
-tv|o-gunaz|Günaz TV|Regional|https://tv.gunaz.tv/hls/live.m3u8||||gunaz.jpg
-tv|o-kepez|KƏPƏZ TV|Regional||||kepeztv.az|kepez.png
-tv|ntv|Naxçıvan TV|Regional|https://str1.yodacdn.net/ntv/video.m3u8~https://str1.yodacdn.net/ntv/index.m3u8~https://str.yodacdn.net/ntv/video.m3u8~https://streams.livetv.az/azerbaijan/nax/playlist.m3u8|https://live.ntv.az/~https://yodaplayer.yodacdn.net/ntvpop/index.php~https://www.ntv.az/~https://operativmm.az/en/canli-tv/naxcivan-tv|https://azepg.ddns.net/aztv/15_days_archive__nxtv_desc.xml|ntv.az|ntv.png
-tv|qafkaz|Qafqaz TV|Regional|https://str.yodacdn.net/qafkaz/video.m3u8~https://str.yodacdn.net/qafkaz/index.m3u8~https://str1.yodacdn.net/qafkaz/video.m3u8||https://azepg.ddns.net/aztv/15_days_archive__qafkaz_desc.xml|qafqaz.tv|qafqaz.png
+tv|biznestv|BIZNES TV|Biznes|https://str.yodacdn.net/biznestv/video.m3u8~https://str.yodacdn.net/biznestv/index.m3u8~https://str1.yodacdn.net/biznestv/video.m3u8||https://azepg.ddns.net/aztv/15_days_archive__biznestv_desc.xml||biznestv.az|biznestv.png
+tv|o-ayaz|Ayaz TV|Musiqi|https://janya-ayaztv.vgcdn.net/ptnr-WebApp/title-Ayaz_TV/v1/vglive-sk-934820/main.m3u8|https://api.mediabay.tv/v2/channels/thread/721|||ayaztv.az|ayaz.png
+tv|o-diginet|Diginet|Musiqi|https://a8.radyotelekom.com.tr:3276/stream/play.m3u8|||||diginet.png
+tv|o-kn|KN Music TV|Musiqi|https://cdn4.yayin.com.tr/kntv/index.m3u8|||||knmusic.jpg
+tv|o-konul|Konul TV|Musiqi||https://api.mediabay.tv/v2/channels/thread/715||||konul.png
+tv|o-konulmusic|Konul TV Music|Musiqi||https://api.mediabay.tv/v2/channels/thread/716||||konulmusic.png
+tv|o-mahni|Mahnı TV|Musiqi|https://mahnitvonline.xyz/mahnitv/index.m3u8|||||mahni.png
+tv|o-max|Max Music TV|Musiqi|https://cdn4.yayin.com.tr/maxtv/index.m3u8|||||maxmusic.jpg
+tv|o-azmusic|Music Azerbaijan HD|Musiqi||https://api.mediabay.tv/v2/channels/thread/717||||azmusic.jpg
+tv|o-showplus|Show Plus|Musiqi|https://rtmp.showplus.tv/hls/myshow.m3u8|||||showplus.png
+tv|tmbtr|TMB TV|Musiqi|https://str.yodacdn.net/tmbtr/video.m3u8~https://str.yodacdn.net/tmbtr/index.m3u8~https://str1.yodacdn.net/tmbtr/video.m3u8||||tmb.az|tmb.png
+tv|medeniyyettele|Mədəniyyət|Mədəniyyət|https://str.yodacdn.net/medeniyyettele/video.m3u8~https://str.yodacdn.net/medeniyyettele/index.m3u8~https://str1.yodacdn.net/medeniyyettele/video.m3u8~https://str.yodacdn.net/medeniyyet/index.m3u8~https://streams.livetv.az/azerbaijan/medeniyyet_stream2/playlist.m3u8|https://canlitv.you/player/index.php?id=12029&mobile=0~https://yodaplayer.yodacdn.net/medeniyyetpop/index.php~https://www.medeniyyettv.az/az~https://operativmm.az/en/canli-tv/medeniyyet|https://azepg.ddns.net/aztv/15_days_archive__madaniyyet_desc.xml||medeniyyettv.az|medeniyyet.png
+tv|eltv|ELTV|Regional|https://str.yodacdn.net/eltv/video.m3u8~https://str.yodacdn.net/eltv/index.m3u8~https://str1.yodacdn.net/eltv/video.m3u8~https://live.eltv.az/live/eltv/playlist.m3u8||https://azepg.ddns.net/aztv/15_days_archive__eltv_desc.xml||eltv.az|eltv_logo.png
+tv|o-gunaz|Günaz TV|Regional|https://tv.gunaz.tv/hls/live.m3u8|||||gunaz.jpg
+tv|o-kepez|KƏPƏZ TV|Regional|||||kepeztv.az|kepez.png
+tv|ntv|Naxçıvan TV|Regional|https://str1.yodacdn.net/ntv/video.m3u8~https://str1.yodacdn.net/ntv/index.m3u8~https://str.yodacdn.net/ntv/video.m3u8~https://streams.livetv.az/azerbaijan/nax/playlist.m3u8|https://live.ntv.az/~https://yodaplayer.yodacdn.net/ntvpop/index.php~https://www.ntv.az/~https://operativmm.az/en/canli-tv/naxcivan-tv|https://azepg.ddns.net/aztv/15_days_archive__nxtv_desc.xml||ntv.az|ntv.png
+tv|qafkaz|Qafqaz TV|Regional|https://str.yodacdn.net/qafkaz/video.m3u8~https://str.yodacdn.net/qafkaz/index.m3u8~https://str1.yodacdn.net/qafkaz/video.m3u8||https://azepg.ddns.net/aztv/15_days_archive__qafkaz_desc.xml||qafqaz.tv|qafqaz.png
 tv|o-vilayet|Vilayət TV|Regional|https://nl.livekadeh.com/hls2/vilayet.m3u8|||vilayet.tv|vilayet.png
-tv|o-alvinovcu|Alvin Ovçu|Xəbər||https://api.catcast.tv/api/channels/39200/getcurrentprogram|||alvinovcu.png
-tv|anewz|AnewZ|Xəbər|https://53be5ef2d13aa.streamlock.net/cubesanewz-secure/smil:cubesanewz-secure-web.smil/playlist.m3u8|https://cdn.maksnet.tv/em/cubesanewz-secure/?abr-app=web&streamname=live~https://anewz.tv/tv-live~https://operativmm.az/en/canli-tv/anewz||anewz.tv|
-tv|o-azstar|Az Star TV|Xəbər|https://live.livestreamtv.ca/azstar/amlst:azstar/playlist.m3u8||||azstar.jpg
-tv|ictimaitele|İctimai|Xəbər|https://str.yodacdn.net/ictimaitele/video.m3u8~https://str.yodacdn.net/ictimaitele/index.m3u8~https://str1.yodacdn.net/ictimaitele/video.m3u8~https://live.itv.az/itv.m3u8~https://node19.connect.az:9081/tv/live/playlist.m3u8|https://itv.az/|https://azepg.ddns.net/aztv/15_days_archive__itv_desc.xml|itv.az|itv.png
-tv|o-kanals|Kanal S|Xəbər|https://lives.atv.az:5443/KANAL-S/streams/kanals.m3u8|https://canlitv.you/player/index.php?id=11844&mobile=0|||start.png
-tv|o-livetv|Live TV|Xəbər|https://tv.mobyservice.ru/livetv-web/index.m3u8||||livetv.jpg
-tv|o-cbcsport|CBC Sport|İdman|https://cbcsports-live.lg.mncdn.com/cbcsports_live/cbcsports/playlist.m3u8||||cbcsport.jpg
-tv|idmantele|İdman TV|İdman|https://str.yodacdn.net/idmantele/video.m3u8~https://str.yodacdn.net/idmantele/index.m3u8~https://str1.yodacdn.net/idmantele/video.m3u8||https://azepg.ddns.net/aztv/15_days_archive__idman_desc.xml|idmantv.az|idman.png
+tv|o-alvinovcu|Alvin Ovçu|Xəbər||https://api.catcast.tv/api/channels/39200/getcurrentprogram||||alvinovcu.png
+tv|anewz|AnewZ|Xəbər|https://53be5ef2d13aa.streamlock.net/cubesanewz-secure/smil:cubesanewz-secure-web.smil/playlist.m3u8|https://cdn.maksnet.tv/em/cubesanewz-secure/?abr-app=web&streamname=live~https://anewz.tv/tv-live~https://operativmm.az/en/canli-tv/anewz|||anewz.tv|
+tv|o-azstar|Az Star TV|Xəbər|https://live.livestreamtv.ca/azstar/amlst:azstar/playlist.m3u8|||||azstar.jpg
+tv|ictimaitele|İctimai|Xəbər|https://str.yodacdn.net/ictimaitele/video.m3u8~https://str.yodacdn.net/ictimaitele/index.m3u8~https://str1.yodacdn.net/ictimaitele/video.m3u8~https://live.itv.az/itv.m3u8~https://node19.connect.az:9081/tv/live/playlist.m3u8|https://itv.az/|https://azepg.ddns.net/aztv/15_days_archive__itv_desc.xml||itv.az|itv.png
+tv|o-kanals|Kanal S|Xəbər|https://lives.atv.az:5443/KANAL-S/streams/kanals.m3u8|https://canlitv.you/player/index.php?id=11844&mobile=0||||start.png
+tv|o-livetv|Live TV|Xəbər|https://tv.mobyservice.ru/livetv-web/index.m3u8|||||livetv.jpg
+tv|o-cbcsport|CBC Sport|İdman|https://cbcsports-live.lg.mncdn.com/cbcsports_live/cbcsports/playlist.m3u8|||||cbcsport.jpg
+tv|idmantele|İdman TV|İdman|https://str.yodacdn.net/idmantele/video.m3u8~https://str.yodacdn.net/idmantele/index.m3u8~https://str1.yodacdn.net/idmantele/video.m3u8||https://azepg.ddns.net/aztv/15_days_archive__idman_desc.xml||idmantv.az|idman.png
 tv|apatv|APA TV|Əyləncə|https://str.yodacdn.net/apatv/video.m3u8~https://str.yodacdn.net/apatv/index.m3u8~https://str1.yodacdn.net/apatv/video.m3u8|||apa.tv|apatv.png
-tv|o-arb|ARB|Əyləncə||https://canlitv.you/player/index.php?id=12985&mobile=0|||arb.png
-tv|arbgunesh|ARB GÜNƏŞ|Əyləncə|https://str.yodacdn.net/arbgunesh/video.m3u8~https://str.yodacdn.net/arbgunesh/index.m3u8~https://str1.yodacdn.net/arbgunesh/video.m3u8|https://canlitv.you/player/index.php?id=12988&mobile=0|https://azepg.ddns.net/aztv/15_days_archive__gunesh_desc.xml|arb.az|gunesh.png
-tv|arb24|ARB24|Əyləncə|https://str.yodacdn.net/arb24/video.m3u8~https://str.yodacdn.net/arb24/index.m3u8~https://str1.yodacdn.net/arb24/video.m3u8|https://canlitv.you/player/index.php?id=12986&mobile=0||arb24.az|arb24.png
-tv|atv|ATV|Əyləncə|https://str.yodacdn.net/atv/video.m3u8~https://str.yodacdn.net/atv/index.m3u8~https://str1.yodacdn.net/atv/video.m3u8~https://lives.atv.az:5443/ATV_TV_STREAM/streams/atvcanli.m3u8||https://azepg.ddns.net/aztv/15_days_archive__atv_desc.xml|atv.az|atv_l.png
-tv|azertv|AZTV|Əyləncə|https://str.yodacdn.net/azertv/video.m3u8~https://str.yodacdn.net/azertv/index.m3u8~https://str1.yodacdn.net/azertv/video.m3u8~https://str.yodacdn.net/aztv/index.m3u8|https://canlitv.you/player/index.php?id=32&mobile=0~https://yodaplayer.yodacdn.net/aztvpop/index.php~https://aztv.az/az~https://operativmm.az/en/canli-tv/aztv~https://tvstream.az/|https://azepg.ddns.net/aztv/15_days_archive__aztv_desc.xml|aztv.az|aztv.png
-tv|bakutv|Baku TV|Əyləncə|https://str.yodacdn.net/bakutv/video.m3u8~https://str.yodacdn.net/bakutv/index.m3u8~https://str1.yodacdn.net/bakutv/video.m3u8~https://rtmp.baku.tv/hls/bakutv.m3u8||https://azepg.ddns.net/aztv/15_days_archive__bakutv_desc.xml|baku.tv|bakutv.webp
-tv|o-cbc|CBC|Əyləncə||https://canlitv.you/player/index.php?id=12310&mobile=0|||cbc.png
-tv|dunyatv|Dunya TV|Əyləncə|https://str.yodacdn.net/dunyatv/video.m3u8~https://str.yodacdn.net/dunyatv/index.m3u8~https://str1.yodacdn.net/dunyatv/video.m3u8|https://canlitv.you/player/index.php?id=12671&mobile=0||dunyatv.az|dunyatv.png
-tv|o-ftv|FTV|Əyləncə|https://stream.ftv.az/live/ftv.m3u8||||ftv.png
-tv|o-mtv|MTV Azerbaijan|Əyləncə||https://api.mediabay.tv/v2/channels/thread/593|||mtv.png
-tv|real|Real TV|Əyləncə|https://str.yodacdn.net/real/video.m3u8~https://str.yodacdn.net/real/index.m3u8~https://str1.yodacdn.net/real/video.m3u8|||realtv.az|real.png
-tv|space|Space|Əyləncə|https://str.yodacdn.net/space/video.m3u8~https://str.yodacdn.net/space/index.m3u8~https://str1.yodacdn.net/space/video.m3u8|https://canlitv.you/player/index.php?id=12312&mobile=0|https://azepg.ddns.net/aztv/15_days_archive__space_desc.xml|spacetv.az|space.png
-tv|vip|VIP HD|Əyləncə|https://str.yodacdn.net/vip/video.m3u8~https://str.yodacdn.net/vip/index.m3u8~https://str1.yodacdn.net/vip/video.m3u8||||viphd.png
-tv|xazartv|XƏZƏR|Əyləncə|https://str.yodacdn.net/xazartv/video.m3u8~https://str.yodacdn.net/xazartv/index.m3u8~https://str1.yodacdn.net/xazartv/video.m3u8~https://www.xezerxeber.az/stream/index.m3u8~https://xezerxeber.az/stream/main_stream.m3u8|https://canlitv.you/player/index.php?id=11827&mobile=0~https://xezerxeber.az/en/live~https://operativmm.az/en/canli-tv/xezer-tv~https://tvstream.az/|https://azepg.ddns.net/aztv/15_days_archive__xezer_desc.xml|xezerxeber.az|xazar.png
-radio|r-anti|Anti Radio|Milli|https://stream.antiradio.net/listen/anti_radio/mp3~https://stream.antiradio.net/radio/8000/mp3|https://stream.antiradio.net/radio/8000/web||antiradio.net|radio-anti.png
-radio|r-araz|Araz 103.3 FM|Milli|https://s14.myradiostream.com/30454/listen.mp3|||arazfm.az|radio-araz.png
-radio|r-asan|Asan Radio|Milli|https://play.asanradio.az/|https://play.asanradio.az||asanradio.az|radio-asan.png
-radio|r-autolife|AutoLife Azerbaijan|Milli|https://radio.autoliferadio.com:8005/radio|https://radio.autoliferadio.com:8005/radio||autoliferadio.com|radio-autolife.png
-radio|r-avto|AVTO FM|Milli||https://live.dinle.az/avtofm|||radio-avto.png
-radio|r-respublica|Azərbaycan Radiosu|Milli|https://str.yodacdn.net/radio_respublica/index.m3u8||||radio-respublica.png
-radio|r-hit|Baku Hit FM|Milli||https://stream.bakuradioalliance.az/hitfm|||radio-hit.png
-radio|r-jukebox|Baku Jukebox|Milli||https://bakujukebox.com/api/stream|||radio-jukebox.png
-radio|r-retro|Baku Retro FM|Milli||https://stream.bakuradioalliance.az/retrofm|||radio-retro.png
-radio|r-dalga|Dalğa FM|Milli||https://live.dinle.az/dalgafm|||radio-dalga.png
-radio|r-kepez|Kəpəz FM|Milli|||||radio-kepez.png
-radio|r-naxcivan|Naxçıvan radiosu|Milli|https://str.yodacdn.net/naxcivanradio/index.m3u8||||radio-naxcivan.png
-radio|r-naz|NAZ RADIO|Milli|https://s2.myradiostream.com/5286/listen.mp3|||nazradio.az|radio-naz.png
-radio|r-planet|Planet FM|Milli|https://live.dinle.az/planetfm|https://live.dinle.az/planetfm||planetfm.az|radio-planet.png
-radio|r-space|Radio Space FM|Milli||https://stream.zeno.fm/rxzd8t0l1ivvv|||radio-space.png
-radio|r-cto|RadiOcto|Milli||https://youtube.radyohizmeti.com/radiocto|||radio-cto.png
-radio|r-saglam|Sağlam Radio|Milli|https://s24.myradiostream.com/:17446/listen.mp3||||radio-saglam.png
-radio|r-vintage|Vintage Radio|Milli||https://trucker.autoliferadio.com:1045/stream|||radio-vintage.png
-radio|r-xezer|Xəzər 103 FM|Milli|https://s40.myradiostream.com/22546/listen.mp3|||xezerfm.az|radio-xezer.png
-radio|r-media|MEDIA FM|Musiqi|https://restreamer.livetv.az/mediafm.index.m3u8~https://icecast.livetv.az/mediafm||||livetv-media.png
-radio|r-mediajazz|MEDIA FM Jazz|Musiqi|https://restreamer.livetv.az/mediajazz.index.m3u8||||livetv-jazz.png
-radio|r-mediamugam|MEDIA FM Muğam|Musiqi|https://restreamer.livetv.az/mediamugam.index.m3u8||||livetv-mugam.png
-radio|r-mediarelax|MEDIA FM Relax|Musiqi|https://restreamer.livetv.az/mediarelax.index.m3u8||||livetv-relax.png
-radio|r-mediarock|MEDIA FM Rock|Musiqi|https://restreamer.livetv.az/mediarock.index.m3u8||||livetv-rock.png
-radio|r-tmb|Radio TMB 100.5|Musiqi|https://str.yodacdn.net/radio_burcfm/index.m3u8||||radio-tmb.png
-radio|r-106|106 FM|Xəbər|https://lives.atv.az:5443/ATV_RADIO_STREAM/streams/WB4ueYRn6G3xPYEr530976787161.m3u8||||radio-106.png
-radio|r-1063|106.3 FM|Xəbər|https://lives.atv.az:5443/ATV_RADIO_STREAM/streams/2uPKOYEwZ4ER3w8W539574970942.m3u8~https://audiostr.atv.az/106.3fm|https://audiostr.atv.az/106.3fm|||radio-1063.png
-radio|r-boss|Business Radio BOSS|Xəbər|https://myradio24.org/bosscomaz|https://myradio24.org/bosscomaz|||radio-boss.png
-radio|r-dfm|DFM|Xəbər|||||radio-dfm.png
-radio|r-ictimai|İctimai Radio|Xəbər|https://stream.itv.az/rtmp:/radio/playlist.m3u8|||itv.az|radio-ictimai.png
-radio|r-enerji|Radio Enerji 101.1 FM|Xəbər|https://icecast.livetv.az/antennfm|https://icecast.livetv.az/antennfm||enerji.fm|radio-enerji.png
-radio|r-realradio|REAL RADIO|Xəbər|https://str.yodacdn.net/radio_real/index.m3u8||||radio-real.png
-radio|r-yurd|Yurd FM|Xəbər|https://restreamer.livetv.az/yurdfm.index.m3u8~https://icecast.livetv.az/yurdfm||||livetv-yurd.png
+tv|o-arb|ARB|Əyləncə||https://canlitv.you/player/index.php?id=12985&mobile=0||||arb.png
+tv|arbgunesh|ARB GÜNƏŞ|Əyləncə|https://str.yodacdn.net/arbgunesh/video.m3u8~https://str.yodacdn.net/arbgunesh/index.m3u8~https://str1.yodacdn.net/arbgunesh/video.m3u8|https://canlitv.you/player/index.php?id=12988&mobile=0|https://azepg.ddns.net/aztv/15_days_archive__gunesh_desc.xml||arb.az|gunesh.png
+tv|arb24|ARB24|Əyləncə|https://str.yodacdn.net/arb24/video.m3u8~https://str.yodacdn.net/arb24/index.m3u8~https://str1.yodacdn.net/arb24/video.m3u8|https://canlitv.you/player/index.php?id=12986&mobile=0|||arb24.az|arb24.png
+tv|atv|ATV|Əyləncə|https://str.yodacdn.net/atv/video.m3u8~https://str.yodacdn.net/atv/index.m3u8~https://str1.yodacdn.net/atv/video.m3u8~https://lives.atv.az:5443/ATV_TV_STREAM/streams/atvcanli.m3u8||https://azepg.ddns.net/aztv/15_days_archive__atv_desc.xml||atv.az|atv_l.png
+tv|azertv|AZTV|Əyləncə|https://str.yodacdn.net/azertv/video.m3u8~https://str.yodacdn.net/azertv/index.m3u8~https://str1.yodacdn.net/azertv/video.m3u8~https://str.yodacdn.net/aztv/index.m3u8|https://canlitv.you/player/index.php?id=32&mobile=0~https://yodaplayer.yodacdn.net/aztvpop/index.php~https://aztv.az/az~https://operativmm.az/en/canli-tv/aztv~https://tvstream.az/|https://azepg.ddns.net/aztv/15_days_archive__aztv_desc.xml||aztv.az|aztv.png
+tv|bakutv|Baku TV|Əyləncə|https://str.yodacdn.net/bakutv/video.m3u8~https://str.yodacdn.net/bakutv/index.m3u8~https://str1.yodacdn.net/bakutv/video.m3u8~https://rtmp.baku.tv/hls/bakutv.m3u8||https://azepg.ddns.net/aztv/15_days_archive__bakutv_desc.xml||baku.tv|bakutv.webp
+tv|o-cbc|CBC|Əyləncə||https://canlitv.you/player/index.php?id=12310&mobile=0||||cbc.png
+tv|dunyatv|Dunya TV|Əyləncə|https://str.yodacdn.net/dunyatv/video.m3u8~https://str.yodacdn.net/dunyatv/index.m3u8~https://str1.yodacdn.net/dunyatv/video.m3u8|https://canlitv.you/player/index.php?id=12671&mobile=0|||dunyatv.az|dunyatv.png
+tv|o-ftv|FTV|Əyləncə|https://stream.ftv.az/live/ftv.m3u8|||||ftv.png
+tv|o-mtv|MTV Azerbaijan|Əyləncə||https://api.mediabay.tv/v2/channels/thread/593||||mtv.png
+tv|real|Real TV|Əyləncə|https://str.yodacdn.net/real/video.m3u8~https://str.yodacdn.net/real/index.m3u8~https://str1.yodacdn.net/real/video.m3u8||||realtv.az|real.png
+tv|space|Space|Əyləncə|https://str.yodacdn.net/space/video.m3u8~https://str.yodacdn.net/space/index.m3u8~https://str1.yodacdn.net/space/video.m3u8|https://canlitv.you/player/index.php?id=12312&mobile=0|https://azepg.ddns.net/aztv/15_days_archive__space_desc.xml||spacetv.az|space.png
+tv|vip|VIP HD|Əyləncə|https://str.yodacdn.net/vip/video.m3u8~https://str.yodacdn.net/vip/index.m3u8~https://str1.yodacdn.net/vip/video.m3u8|||||viphd.png
+tv|xazartv|XƏZƏR|Əyləncə|https://str.yodacdn.net/xazartv/video.m3u8~https://str.yodacdn.net/xazartv/index.m3u8~https://str1.yodacdn.net/xazartv/video.m3u8~https://www.xezerxeber.az/stream/index.m3u8~https://xezerxeber.az/stream/main_stream.m3u8|https://canlitv.you/player/index.php?id=11827&mobile=0~https://xezerxeber.az/en/live~https://operativmm.az/en/canli-tv/xezer-tv~https://tvstream.az/|https://azepg.ddns.net/aztv/15_days_archive__xezer_desc.xml||xezerxeber.az|xazar.png
+radio|r-anti|Anti Radio|Milli|https://stream.antiradio.net/listen/anti_radio/mp3~https://stream.antiradio.net/radio/8000/mp3|https://stream.antiradio.net/radio/8000/web||https://onlineradiobox.com/json/az/anti/playlist?lang=en|antiradio.net|radio-anti.png
+radio|r-araz|Araz 103.3 FM|Milli|https://s14.myradiostream.com/30454/listen.mp3|||https://onlineradiobox.com/json/az/araz/playlist?lang=en|arazfm.az|radio-araz.png
+radio|r-asan|Asan Radio|Milli|https://play.asanradio.az/|https://play.asanradio.az|||asanradio.az|radio-asan.png
+radio|r-autolife|AutoLife Azerbaijan|Milli|https://radio.autoliferadio.com:8005/radio|https://radio.autoliferadio.com:8005/radio||https://onlineradiobox.com/json/az/autolifeazerbaijan/playlist?lang=en|autoliferadio.com|radio-autolife.png
+radio|r-avto|AVTO FM|Milli||https://live.dinle.az/avtofm||https://onlineradiobox.com/json/az/avto/playlist?lang=en||radio-avto.png
+radio|r-respublica|Azərbaycan Radiosu|Milli|https://str.yodacdn.net/radio_respublica/index.m3u8|||||radio-respublica.png
+radio|r-hit|Baku Hit FM|Milli||https://stream.bakuradioalliance.az/hitfm||||radio-hit.png
+radio|r-jukebox|Baku Jukebox|Milli||https://bakujukebox.com/api/stream||||radio-jukebox.png
+radio|r-retro|Baku Retro FM|Milli||https://stream.bakuradioalliance.az/retrofm||https://onlineradiobox.com/json/az/bakuretrofm/playlist?lang=en||radio-retro.png
+radio|r-dalga|Dalğa FM|Milli||https://live.dinle.az/dalgafm||||radio-dalga.png
+radio|r-kepez|Kəpəz FM|Milli||||https://onlineradiobox.com/json/az/kepez/playlist?lang=en||radio-kepez.png
+radio|r-naxcivan|Naxçıvan radiosu|Milli|https://str.yodacdn.net/naxcivanradio/index.m3u8|||||radio-naxcivan.png
+radio|r-naz|NAZ RADIO|Milli|https://s2.myradiostream.com/5286/listen.mp3|||https://onlineradiobox.com/json/az/naz/playlist?lang=en|nazradio.az|radio-naz.png
+radio|r-planet|Planet FM|Milli|https://live.dinle.az/planetfm|https://live.dinle.az/planetfm|||planetfm.az|radio-planet.png
+radio|r-space|Radio Space FM|Milli||https://stream.zeno.fm/rxzd8t0l1ivvv||https://onlineradiobox.com/json/az/spacefm104/playlist?lang=en||radio-space.png
+radio|r-cto|RadiOcto|Milli||https://youtube.radyohizmeti.com/radiocto||||radio-cto.png
+radio|r-saglam|Sağlam Radio|Milli|https://s24.myradiostream.com/:17446/listen.mp3|||https://onlineradiobox.com/json/az/saglam/playlist?lang=en||radio-saglam.png
+radio|r-vintage|Vintage Radio|Milli||https://trucker.autoliferadio.com:1045/stream||||radio-vintage.png
+radio|r-xezer|Xəzər 103 FM|Milli|https://s40.myradiostream.com/22546/listen.mp3|||https://onlineradiobox.com/json/az/xezer103/playlist?lang=en|xezerfm.az|radio-xezer.png
+radio|r-media|MEDIA FM|Musiqi|https://restreamer.livetv.az/mediafm.index.m3u8~https://icecast.livetv.az/mediafm|||||livetv-media.png
+radio|r-mediajazz|MEDIA FM Jazz|Musiqi|https://restreamer.livetv.az/mediajazz.index.m3u8|||||livetv-jazz.png
+radio|r-mediamugam|MEDIA FM Muğam|Musiqi|https://restreamer.livetv.az/mediamugam.index.m3u8|||||livetv-mugam.png
+radio|r-mediarelax|MEDIA FM Relax|Musiqi|https://restreamer.livetv.az/mediarelax.index.m3u8|||||livetv-relax.png
+radio|r-mediarock|MEDIA FM Rock|Musiqi|https://restreamer.livetv.az/mediarock.index.m3u8|||||livetv-rock.png
+radio|r-tmb|Radio TMB 100.5|Musiqi|https://str.yodacdn.net/radio_burcfm/index.m3u8|||||radio-tmb.png
+radio|r-106|106 FM|Xəbər|https://lives.atv.az:5443/ATV_RADIO_STREAM/streams/WB4ueYRn6G3xPYEr530976787161.m3u8|||||radio-106.png
+radio|r-1063|106.3 FM|Xəbər|https://lives.atv.az:5443/ATV_RADIO_STREAM/streams/2uPKOYEwZ4ER3w8W539574970942.m3u8~https://audiostr.atv.az/106.3fm|https://audiostr.atv.az/106.3fm||||radio-1063.png
+radio|r-boss|Business Radio BOSS|Xəbər|https://myradio24.org/bosscomaz|https://myradio24.org/bosscomaz||https://onlineradiobox.com/json/az/boss/playlist?lang=en||radio-boss.png
+radio|r-dfm|DFM|Xəbər||||||radio-dfm.png
+radio|r-ictimai|İctimai Radio|Xəbər|https://stream.itv.az/rtmp:/radio/playlist.m3u8|||https://onlineradiobox.com/json/az/ictimai/playlist?lang=en|itv.az|radio-ictimai.png
+radio|r-enerji|Radio Enerji 101.1 FM|Xəbər|https://icecast.livetv.az/antennfm|https://icecast.livetv.az/antennfm||https://onlineradiobox.com/json/az/antenn/playlist?lang=en|enerji.fm|radio-enerji.png
+radio|r-realradio|REAL RADIO|Xəbər|https://str.yodacdn.net/radio_real/index.m3u8|||||radio-real.png
+radio|r-yurd|Yurd FM|Xəbər|https://restreamer.livetv.az/yurdfm.index.m3u8~https://icecast.livetv.az/yurdfm|||||livetv-yurd.png
