@@ -24,6 +24,10 @@ class PulsePlaybackService : Service() {
     private val binder = LocalBinder()
     lateinit var player: ExoPlayer
         private set
+    var currentStationCode: String = ""
+        private set
+    var currentStationName: String = ""
+        private set
 
     override fun onCreate() {
         super.onCreate()
@@ -56,6 +60,8 @@ class PulsePlaybackService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val station = intent?.getStringExtra(EXTRA_STATION).orEmpty().ifBlank { "PulseAZ Radio" }
+        currentStationName = station
+        currentStationCode = intent?.getStringExtra(EXTRA_STATION_CODE).orEmpty()
         showRadioNotification(station)
         return START_STICKY
     }
@@ -120,6 +126,7 @@ class PulsePlaybackService : Service() {
 
     companion object {
         const val EXTRA_STATION = "pulseaz.station"
+        const val EXTRA_STATION_CODE = "pulseaz.station_code"
         private const val CHANNEL_ID = "pulseaz-radio-playback"
         private const val NOTIFICATION_ID = 1701
     }
