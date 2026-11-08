@@ -2,7 +2,7 @@
 
 PulseAZ TV is a native Android player and directory for Azerbaijani television and radio streams.
 
-## Version 1.4
+## Version 1.5
 
 - Redesigned dark navy interface with teal/blue accents, rounded cards, animated list entrances and a live indicator.
 - Native AndroidX Media3 / ExoPlayer playback. Channel selection never opens a website or an external browser.
@@ -13,7 +13,8 @@ PulseAZ TV is a native Android player and directory for Azerbaijani television a
 - Radio playback for public direct HTTPS MP3/AAC/HLS URLs, with an animated audio visualizer.
 - SVG interface icons replace emoji/glyph placeholders; channel logos try multiple public icon sources with branded initials as a fallback.
 - On selected channels, a transparent Android WebView remains attached beneath the native player and monitors the official public player and its resource list for up to 18 seconds. It captures only publicly exposed HTTPS `.m3u8` requests and passes them to Media3; no webpage is visible and no external browser is launched.
-- The resolver polls for delayed iframe/player initialization, reads official-player Referer/Origin/User-Agent request metadata, and reuses only cookies scoped to the actual stream URL.
+- The resolver polls for delayed iframe/player initialization, attempts muted HTML5/JWPlayer/Video.js playback only after the user selects a channel, then captures its publicly requested HLS URL and Referer/Origin/User-Agent metadata. It reuses only cookies scoped to the exact stream URL.
+- Some official players wait for an explicit play action before requesting HLS; the hidden probe now triggers that action in the page engine while keeping all page content invisible and the native Media3 player as the only visible video surface.
 - Common HTTP failures (403, 404, 5xx) are explained in the player status. The app tests alternative sources and remembers successful non-expiring URLs per channel.
 - Logo float, live-badge pulse/scale, typography refinement, card entrance motion and the radio equalizer add subtle visual effects.
 - Referer/Origin headers are sent when needed by the public player. The app does not bypass DRM, sign-in, geo restrictions, tokens, or other access controls.
@@ -37,4 +38,4 @@ The GitHub Actions workflow `.github/workflows/android-apk.yml` builds the debug
 3. Open the latest successful run.
 4. Download the **PulseAZ-TV-debug-apk** artifact and extract `app-debug.apk`.
 
-The project uses JDK 17, Gradle 8.13, Android Gradle Plugin 8.13.2, Kotlin 2.3.0, Android API 36 and AndroidX Media3 1.11.1. App version is 1.4.0 (versionCode 5). AzTV's paid Cinerama source and Kanal 35 have been removed.
+The project uses JDK 17, Gradle 8.13, Android Gradle Plugin 8.13.2, Kotlin 2.3.0, Android API 36 and AndroidX Media3 1.11.1. App version is 1.5.0 (versionCode 6). AzTV's paid Cinerama source and Kanal 35 have been removed.
