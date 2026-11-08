@@ -97,6 +97,7 @@ class MainActivity : Activity() {
     private var activeStreamIndex = 0
     private var resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
     private val animations = mutableListOf<Animator>()
+    private val audioAnimations = mutableListOf<Animator>()
     private val logoCache = HashMap<String, Bitmap>()
     private val loadingLogos = HashSet<String>()
     private val favorites by lazy { getSharedPreferences("pulseaz_tv", MODE_PRIVATE) }
@@ -345,7 +346,7 @@ class MainActivity : Activity() {
                 repeatMode = ValueAnimator.REVERSE
                 interpolator = DecelerateInterpolator()
             }
-            animations.add(animator)
+            audioAnimations.add(animator)
         }
         audioContent.addView(equalizer)
         audioPanel.addView(audioContent, FrameLayout.LayoutParams(
@@ -666,6 +667,8 @@ class MainActivity : Activity() {
     }
 
     private fun playChannel(channel: TvChannel) {
+        audioAnimations.forEach { it.cancel() }
+        statusText.setTextColor(textMuted)
         selectedChannel = channel
         selectedRadio = null
         titleText.text = channel.name
@@ -679,6 +682,8 @@ class MainActivity : Activity() {
     }
 
     private fun playRadio(station: RadioStation) {
+        statusText.setTextColor(textMuted)
+        audioAnimations.forEach { it.start() }
         selectedRadio = station
         selectedChannel = null
         titleText.text = station.name
@@ -898,7 +903,9 @@ class MainActivity : Activity() {
 
     override fun onDestroy() {
         animations.forEach { it.cancel() }
+        audioAnimations.forEach { it.cancel() }
         animations.clear()
+        audioAnimations.clear()
         playerView.player = null
         player?.release()
         player = null
