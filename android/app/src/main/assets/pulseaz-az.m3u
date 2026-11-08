@@ -1,0 +1,35 @@
+#EXTM3U
+# Azərbaycan kanalları üçün açıq kataloqlarda yayımlanmış HLS ünvanları.
+# Mənbə: https://github.com/iptv-org/iptv/blob/master/streams/az.m3u
+# Ünvanlar dəyişə, dayana və ya region məhdudiyyətinə düşə bilər.
+# Yayımları saxlamırıq və məhdudiyyətləri keçmirik.
+
+#EXTINF:-1 tvg-name="AzTV" group-title="Xəbər",AzTV
+https://stream8.cinerama.uz/1455/tracks-v1a1/mono.m3u8
+
+#EXTINF:-1 tvg-name="ATV" group-title="Əyləncə",ATV
+https://lives.atv.az:5443/ATV_TV_STREAM/streams/atvcanli.m3u8
+
+#EXTINF:-1 tvg-name="Baku TV" group-title="Xəbər",Baku TV
+https://rtmp.baku.tv/hls/bakutv.m3u8
+
+#EXTINF:-1 tvg-name="EL TV" group-title="Regional",EL TV
+https://live.eltv.az/live/eltv/playlist.m3u8
+
+#EXTINF:-1 tvg-name="İctimai TV" group-title="Xəbər",İctimai TV
+https://live.itv.az/itv.m3u8
+
+#EXTINF:-1 tvg-name="Kanal 35" group-title="Regional",Kanal 35
+https://str2.yodacdn.net/kanal35/index.m3u8
+
+#EXTINF:-1 tvg-name="Kanal S" group-title="Regional",Kanal S
+https://lives.atv.az:5443/KANAL-S/streams/kanals.m3u8
+
+#EXTINF:-1 tvg-name="Mədəniyyət TV" group-title="Mədəniyyət",Mədəniyyət TV
+https://str.yodacdn.net/medeniyyettele/index.m3u8
+
+#EXTINF:-1 tvg-name="Naxçıvan TV" group-title="Regional",Naxçıvan TV
+https://str2.yodacdn.net/ntv/video.m3u8
+
+#EXTINF:-1 tvg-name="Xəzər TV" group-title="Əyləncə",Xəzər TV
+https://www.xezerxeber.az/stream/index.m3u8
