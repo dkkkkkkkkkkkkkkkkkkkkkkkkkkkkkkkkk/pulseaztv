@@ -202,7 +202,7 @@ class MainActivity : Activity() {
         assets.open("channel_catalog.psv").bufferedReader(Charsets.UTF_8).useLines { lines ->
             lines.filter { it.isNotBlank() }.forEach { line ->
                 val fields = line.split('|', limit = 9)
-                if (fields.size < 9) return@forEach
+                if (fields.size < 10) return@forEach
                 val kind = fields[0].trim()
                 val id = fields[1].trim()
                 val rawName = fields[2].trim()
@@ -222,8 +222,9 @@ class MainActivity : Activity() {
                     .filter { it.startsWith("https://", true) }
                     .distinct()
                 val guide = fields[6].trim().takeIf { it.startsWith("https://", true) }
-                val logoDomain = fields[7].trim().takeIf { it.isNotBlank() }
-                val logoFile = fields[8].trim().takeIf { it.isNotBlank() }
+                val trackUrl = fields[7].trim().takeIf { it.startsWith("https://", true) }
+                val logoDomain = fields[8].trim().takeIf { it.isNotBlank() }
+                val logoFile = fields[9].trim().takeIf { it.isNotBlank() }
                 val code = when (id) {
                     "azertv" -> "AZTV"
                     "ntv" -> "NTV"
@@ -267,7 +268,7 @@ class MainActivity : Activity() {
                         streams = streams,
                         logoUrl = logoUrl,
                         pages = pages,
-                        trackUrl = null,
+                        trackUrl = trackUrl,
                         logoFile = logoFile
                     ))
                 }
@@ -1731,7 +1732,7 @@ class MainActivity : Activity() {
                             BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
                         }
                         // Very small favicons are blurred in a 58dp tile; keep the sharp initials instead.
-                        if (bitmap != null && (bitmap!!.width < 96 || bitmap!!.height < 96)) {
+                        if (bitmap != null && (maxOf(bitmap!!.width, bitmap!!.height) < 96 || bitmap!!.width < 40 || bitmap!!.height < 32)) {
                             bitmap = null
                         }
                     }
