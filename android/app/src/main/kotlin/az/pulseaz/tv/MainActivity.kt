@@ -189,6 +189,87 @@ class MainActivity : Activity() {
     private lateinit var channels: List<TvChannel>
     private lateinit var radios: List<RadioStation>
 
+    private fun loadCatalog() {
+        val tv = mutableListOf<TvChannel>()
+        val radio = mutableListOf<RadioStation>()
+        assets.open("channel_catalog.psv").bufferedReader(Charsets.UTF_8).useLines { lines ->
+            lines.filter { it.isNotBlank() }.forEach { line ->
+                val fields = line.split('|', limit = 9)
+                if (fields.size < 9) return@forEach
+                val kind = fields[0].trim()
+                val id = fields[1].trim()
+                val rawName = fields[2].trim()
+                val name = when (id) {
+                    "azertv" -> "AzTV"
+                    "ntv" -> "Naxçıvan TV"
+                    "medeniyyettele" -> "Mədəniyyət TV"
+                    "ictimaitele" -> "İctimai TV"
+                    "xazartv" -> "Xəzər TV"
+                    else -> rawName
+                }
+                val category = fields[3].trim().ifBlank { "Milli" }
+                val streams = fields[4].split('~').map { it.trim() }
+                    .filter { it.startsWith("https://", true) }
+                    .distinct()
+                val pages = fields[5].split('~').map { it.trim() }
+                    .filter { it.startsWith("https://", true) }
+                    .distinct()
+                val guide = fields[6].trim().takeIf { it.startsWith("https://", true) }
+                val logoDomain = fields[7].trim().takeIf { it.isNotBlank() }
+                val logoFile = fields[8].trim().takeIf { it.isNotBlank() }
+                val code = when (id) {
+                    "azertv" -> "AZTV"
+                    "ntv" -> "NTV"
+                    "medeniyyettele" -> "MEDEN"
+                    "anewz" -> "ANEWZ"
+                    "xazartv" -> "XEZER"
+                    "ictimaitele" -> "ITV"
+                    "bakutv" -> "BAKU"
+                    "eltv" -> "ELTV"
+                    "o-kanals" -> "KANALS"
+                    "o-ayaz" -> "AYAZ"
+                    "o-vilayet" -> "VILAYET"
+                    "idmantele" -> "IDMAN"
+                    else -> id.uppercase(Locale.ROOT).replace('-', '_')
+                }
+                val logoUrl = when (code) {
+                    "AZTV" -> "https://upload.wikimedia.org/wikipedia/commons/4/4b/AzTV_%282019%29.png"
+                    "MEDEN" -> "https://upload.wikimedia.org/wikipedia/commons/2/25/M%C9%99d%C9%99niyy%C9%99t_TV_%282019%29.png"
+                    "NTV" -> "https://upload.wikimedia.org/wikipedia/commons/f/fa/Nax%C3%A7%C4%B1van_TV_%282025%29.png"
+                    "ANEWZ" -> "https://anewz.tv/files-redizajn/img/logo-text.svg"
+                    "XEZER" -> "https://tvstream.az/assets/xezertv.jpg"
+                    else -> logoDomain?.let { "https://www.google.com/s2/favicons?domain=" + it + "&sz=256" }
+                }
+                if (kind == "tv") {
+                    tv.add(TvChannel(
+                        name = name,
+                        code = code,
+                        category = category,
+                        streams = streams,
+                        logoUrl = logoUrl,
+                        qualityHint = if (streams.isEmpty()) "Canlı player" else "Canlı yayım",
+                        pages = pages,
+                        guideUrl = guide,
+                        logoFile = logoFile
+                    ))
+                } else if (kind == "radio") {
+                    radio.add(RadioStation(
+                        name = name,
+                        code = code,
+                        genre = category,
+                        streams = streams,
+                        logoUrl = logoUrl,
+                        pages = pages,
+                        trackUrl = null,
+                        logoFile = logoFile
+                    ))
+                }
+            }
+        }
+        channels = tv.distinctBy { it.code }
+        radios = radio.distinctBy { it.code }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.statusBarColor = bg
