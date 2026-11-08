@@ -5,6 +5,7 @@ import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.app.Activity
 import android.app.AlertDialog
+import android.app.PictureInPictureParams
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
@@ -16,9 +17,12 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.Build
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.Gravity
+import android.util.Xml
+import android.util.Rational
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.DecelerateInterpolator
@@ -58,6 +62,9 @@ import androidx.media3.ui.TrackSelectionDialogBuilder
 import java.io.ByteArrayInputStream
 import java.net.HttpURLConnection
 import java.net.URL
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.concurrent.atomic.AtomicBoolean
 
 private data class TvChannel(
@@ -66,7 +73,10 @@ private data class TvChannel(
     val category: String,
     val streams: List<String>,
     val logoUrl: String? = null,
-    val qualityHint: String = "Canlı yayım"
+    val qualityHint: String = "Canlı yayım",
+    val pages: List<String> = emptyList(),
+    val guideUrl: String? = null,
+    val logoFile: String? = null
 )
 
 private data class RadioStation(
@@ -74,7 +84,10 @@ private data class RadioStation(
     val code: String,
     val genre: String,
     val streams: List<String>,
-    val logoUrl: String? = null
+    val logoUrl: String? = null,
+    val pages: List<String> = emptyList(),
+    val trackUrl: String? = null,
+    val logoFile: String? = null
 )
 
 class MainActivity : Activity() {
@@ -98,9 +111,9 @@ class MainActivity : Activity() {
     private lateinit var qualityButton: TextView
     private lateinit var fitButton: TextView
     private lateinit var retryButton: TextView
-    private lateinit var sourceButton: TextView
     private lateinit var muteButton: TextView
     private lateinit var volumeValueText: TextView
+    private lateinit var guideButton: TextView
     private lateinit var volumeSlider: SeekBar
     private lateinit var searchBox: EditText
     private lateinit var channelList: LinearLayout
@@ -116,6 +129,7 @@ class MainActivity : Activity() {
     private var selectedCategory = "Hamısı"
     private var selectedTab = "tv"
     private var favoritesOnly = false
+    private var recentOnly = false
     private var activeStreams: List<String> = emptyList()
     private var activeStreamIndex = 0
     private var pageResolutionAttempted = 0
@@ -124,6 +138,8 @@ class MainActivity : Activity() {
     private var streamRequestHeaders: Map<String, String> = emptyMap()
     private var lastPlaybackError: String? = null
     private var lastNonMutedVolume = 1f
+    private var yodaTokenCache: String? = null
+    private var yodaTokenExpiresAt = 0L
     private var resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
     private val animations = mutableListOf<Animator>()
     private val audioAnimations = mutableListOf<Animator>()
@@ -170,95 +186,14 @@ class MainActivity : Activity() {
     private var resolverProbeRunnable: Runnable? = null
     private val resolverHandler = Handler(Looper.getMainLooper())
     private val favorites by lazy { getSharedPreferences("pulseaz_tv", MODE_PRIVATE) }
-
-    private val channels = listOf(
-        TvChannel("AzTV", "AZTV", "Xəbər", listOf(
-            "https://str.yodacdn.net/aztv/index.m3u8",
-            "https://str.yodacdn.net/azertv/index.m3u8"
-        ), "https://upload.wikimedia.org/wikipedia/commons/4/4b/AzTV_%282019%29.png", "Rəsmi sayt + əlavə açıq player mənbələri"),
-        TvChannel("Baku TV", "BAKU", "Xəbər", listOf(
-            "https://rtmp.baku.tv/hls/bakutv.m3u8"
-        ), "https://www.google.com/s2/favicons?domain=baku.tv&sz=128", "Canlı yayım"),
-        TvChannel("AnewZ", "ANEWZ", "Xəbər", listOf(
-            "https://53be5ef2d13aa.streamlock.net/cubesanewz-secure/smil:cubesanewz-secure-web.smil/playlist.m3u8"
-        ), "https://anewz.tv/files-redizajn/img/logo-text.svg", "Rəsmi və açıq player mənbələri"),
-        TvChannel("İctimai TV", "ITV", "Xəbər", listOf(
-            "https://live.itv.az/itv.m3u8"
-        ), "https://www.google.com/s2/favicons?domain=itv.az&sz=128", "Canlı yayım"),
-        TvChannel("EL TV", "ELTV", "Regional", listOf(
-            "https://live.eltv.az/live/eltv/playlist.m3u8"
-        ), "https://www.google.com/s2/favicons?domain=eltv.az&sz=128", "Bəzi vaxtlarda yayım olmaya bilər"),
-        TvChannel("Kanal S", "KANALS", "Regional", listOf(
-            "https://lives.atv.az:5443/KANAL-S/streams/kanals.m3u8"
-        ), "https://www.google.com/s2/favicons?domain=kanals.az&sz=128", "Canlı yayım"),
-        TvChannel("Mədəniyyət TV", "MEDEN", "Mədəniyyət", listOf(
-            "https://str.yodacdn.net/medeniyyet/index.m3u8",
-            "https://str.yodacdn.net/medeniyyettele/index.m3u8",
-            "https://streams.livetv.az/azerbaijan/medeniyyet_stream2/playlist.m3u8"
-        ), "https://upload.wikimedia.org/wikipedia/commons/2/25/M%C9%99d%C9%99niyy%C9%99t_TV_%282019%29.png", "Rəsmi player və alternativ HLS mənbələri"),
-        TvChannel("Naxçıvan TV", "NTV", "Regional", listOf(
-            "https://str2.yodacdn.net/ntv/video.m3u8",
-            "https://streams.livetv.az/azerbaijan/nax/playlist.m3u8"
-        ), "https://upload.wikimedia.org/wikipedia/commons/f/fa/Nax%C3%A7%C4%B1van_TV_%282025%29.png", "Rəsmi player və alternativ HLS mənbələri"),
-        TvChannel("Xəzər TV", "XEZER", "Əyləncə", listOf(
-            "https://www.xezerxeber.az/stream/index.m3u8",
-            "https://xezerxeber.az/stream/main_stream.m3u8"
-        ), "https://tvstream.az/assets/xezertv.jpg", "Rəsmi və alternativ player mənbələri"),
-        TvChannel("Ayaz TV", "AYAZ", "Musiqi", listOf(
-            "https://janya-ayaztv.vgcdn.net/ptnr-WebApp/title-Ayaz_TV/v1/vglive-sk-934820/main.m3u8"
-        ), "https://www.google.com/s2/favicons?domain=ayaztv.az&sz=128", "720p mənbə kimi siyahılanıb"),
-        TvChannel("Vilayət TV", "VILAYET", "Regional", listOf(
-            "https://nl.livekadeh.com/hls2/vilayet.m3u8"
-        ), "https://www.google.com/s2/favicons?domain=livekadeh.com&sz=128", "Açıq siyahıda olan HLS")
-    )
-
-    private val radios = listOf(
-        RadioStation("İctimai Radio · 90 FM", "ITV90", "Xəbər", listOf(
-            "https://stream.itv.az/rtmp:/radio/playlist.m3u8"
-        ), "https://www.google.com/s2/favicons?domain=itv.az&sz=128"),
-        RadioStation("Araz FM · 103.3", "ARAZ", "Musiqi", listOf(
-            "https://s14.myradiostream.com/30454/listen.mp3"
-        ), "https://www.google.com/s2/favicons?domain=arazfm.az&sz=128"),
-        RadioStation("ASAN Radio", "ASAN", "Xəbər", listOf(
-            "https://play.asanradio.az/"
-        ), "https://www.google.com/s2/favicons?domain=asanradio.az&sz=128"),
-        RadioStation("Yurd FM", "YURD", "Milli", listOf(
-            "https://icecast.livetv.az/yurdfm"
-        ), "https://www.google.com/s2/favicons?domain=livetv.az&sz=128"),
-        RadioStation("Media FM · 105.5", "MEDIA", "Musiqi", listOf(
-            "https://icecast.livetv.az/mediafm"
-        ), "https://www.google.com/s2/favicons?domain=livetv.az&sz=128"),
-        RadioStation("Anti Radio", "ANTI", "Musiqi", listOf(
-            "https://stream.antiradio.net/listen/anti_radio/mp3",
-            "https://stream.antiradio.net/radio/8000/mp3"
-        ), "https://www.google.com/s2/favicons?domain=antiradio.net&sz=128"),
-        RadioStation("NAZ Radio", "NAZ", "Musiqi", listOf(
-            "https://s2.myradiostream.com/5286/listen.mp3"
-        ), "https://www.google.com/s2/favicons?domain=myradiostream.com&sz=128"),
-        RadioStation("AutoLife Radio Azerbaijan", "AUTOLIFE", "Musiqi", listOf(
-            "https://radio.autoliferadio.com:8005/radio"
-        ), "https://www.google.com/s2/favicons?domain=autoliferadio.com&sz=128"),
-        RadioStation("Caspian Business Radio BOSS", "BOSS", "Musiqi", listOf(
-            "https://myradio24.org/bosscomaz"
-        ), "https://www.google.com/s2/favicons?domain=boss.com.az&sz=128"),
-        RadioStation("Radio Enerji · 101.1 FM", "ENERJI", "Musiqi", listOf(
-            "https://icecast.livetv.az/antennfm"
-        ), "https://www.google.com/s2/favicons?domain=livetv.az&sz=128"),
-        RadioStation("Planet FM · 88.7", "PLANET", "Musiqi", listOf(
-            "https://live.dinle.az/planetfm"
-        ), "https://www.google.com/s2/favicons?domain=dinle.az&sz=128"),
-        RadioStation("Xəzər FM", "XEZERFM", "Musiqi", listOf(
-            "https://s40.myradiostream.com/:22546/listen.mp3?"
-        ), "https://www.google.com/s2/favicons?domain=myradiostream.com&sz=128"),
-        RadioStation("106.3 FM", "FM106", "Milli", listOf(
-            "https://audiostr.atv.az/106.3fm"
-        ), "https://www.google.com/s2/favicons?domain=atv.az&sz=128")
-    )
+    private lateinit var channels: List<TvChannel>
+    private lateinit var radios: List<RadioStation>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.statusBarColor = bg
         window.navigationBarColor = bg
+        loadCatalog()
         buildScreen()
 
         val httpFactory = DefaultHttpDataSource.Factory()
