@@ -13,6 +13,8 @@ import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.Gravity
@@ -28,6 +30,13 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
+import android.webkit.CookieManager
+import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
+import android.webkit.WebSettings
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
@@ -42,8 +51,10 @@ import com.caverock.androidsvg.SVG
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import androidx.media3.ui.TrackSelectionDialogBuilder
+import java.io.ByteArrayInputStream
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.concurrent.atomic.AtomicBoolean
 
 private data class TvChannel(
     val name: String,
@@ -111,21 +122,42 @@ class MainActivity : Activity() {
 
     // Only inspect publicly reachable pages for openly exposed HTTPS HLS media.
     private val resolverPages = mapOf(
-        "AZTV" to listOf("https://aztv.az/az"),
-        "MEDEN" to listOf("https://medeniyyettv.az/az"),
-        "NTV" to listOf("https://live.ntv.az/", "https://www.ntv.az/", "https://yoda.az/tv/ntv/"),
-        "K35" to listOf("https://yoda.az/tv/kanal35/"),
-        "ANEWZ" to listOf("https://anewz.tv/"),
-        "XEZER" to listOf("https://tvstream.az/", "https://xezerxeber.az/en/live", "https://yoda.az/tv/xazartv/"),
-        "AZINT" to listOf("https://internationalradio.az/az")
+        "AZTV" to listOf(
+            "https://yodaplayer.yodacdn.net/aztvpop/index.php",
+            "https://aztv.az/az"
+        ),
+        "MEDEN" to listOf(
+            "https://yodaplayer.yodacdn.net/medeniyyetpop/index.php",
+            "https://medeniyyettv.az/az"
+        ),
+        "NTV" to listOf(
+            "https://yodaplayer.yodacdn.net/ntvpop/index.php",
+            "https://www.ntv.az/",
+            "https://live.ntv.az/"
+        ),
+        "ANEWZ" to listOf(
+            "https://cdn.maksnet.tv/em/cubesanewz-secure/?abr-app=web&streamname=live",
+            "https://anewz.tv/tv-live"
+        ),
+        "XEZER" to listOf(
+            "https://xezerxeber.az/en/live",
+            "https://tvstream.az/"
+        ),
+        "AZINT" to listOf(
+            "https://yodaplayer.yodacdn.net/radiointpop/index.php",
+            "https://internationalradio.az/az"
+        )
     )
+    private var resolverWebView: WebView? = null
+    private var resolverGeneration = 0
+    private var resolverTimeout: Runnable? = null
+    private val resolverHandler = Handler(Looper.getMainLooper())
     private val favorites by lazy { getSharedPreferences("pulseaz_tv", MODE_PRIVATE) }
 
     private val channels = listOf(
         TvChannel("AzTV", "AZTV", "Xəbər", listOf(
-            "https://str.yodacdn.net/azertv/index.m3u8",
-            "https://stream8.cinerama.uz/1455/tracks-v1a1/mono.m3u8"
-        ), "https://www.google.com/s2/favicons?domain=aztv.az&sz=128", "Mövcud HLS variantından asılıdır"),
+            "https://str.yodacdn.net/azertv/index.m3u8"
+        ), "https://www.google.com/s2/favicons?domain=aztv.az&sz=256", "Yalnız açıq rəsmi yayım mənbələri"),
         TvChannel("Baku TV", "BAKU", "Xəbər", listOf(
             "https://rtmp.baku.tv/hls/bakutv.m3u8"
         ), "https://www.google.com/s2/favicons?domain=baku.tv&sz=128", "Canlı yayım"),
@@ -138,22 +170,21 @@ class MainActivity : Activity() {
         TvChannel("EL TV", "ELTV", "Regional", listOf(
             "https://live.eltv.az/live/eltv/playlist.m3u8"
         ), "https://www.google.com/s2/favicons?domain=eltv.az&sz=128", "Bəzi vaxtlarda yayım olmaya bilər"),
-        TvChannel("Kanal 35", "K35", "Regional", listOf(
-            "https://str2.yodacdn.net/kanal35/index.m3u8"
-        ), "https://www.google.com/s2/favicons?domain=kanal35.az&sz=256", "Açıq HLS mənbə yoxlanılır"),
         TvChannel("Kanal S", "KANALS", "Regional", listOf(
             "https://lives.atv.az:5443/KANAL-S/streams/kanals.m3u8"
         ), "https://www.google.com/s2/favicons?domain=kanals.az&sz=128", "Canlı yayım"),
         TvChannel("Mədəniyyət TV", "MEDEN", "Mədəniyyət", listOf(
             "https://str.yodacdn.net/medeniyyettele/index.m3u8",
-            "https://str.yodacdn.net/medeniyyet/index.m3u8"
-        ), "https://upload.wikimedia.org/wikipedia/commons/f/fc/M%C9%99d%C9%99niyy%C9%99t_TV_logo.png", "Açıq HLS mənbələri yoxlanılır"),
+            "https://streams.livetv.az/azerbaijan/medeniyyet_stream2/playlist.m3u8"
+        ), "https://www.google.com/s2/favicons?domain=medeniyyettv.az&sz=256", "Rəsmi player və alternativ HLS mənbələri"),
         TvChannel("Naxçıvan TV", "NTV", "Regional", listOf(
-            "https://str2.yodacdn.net/ntv/video.m3u8"
-        ), "https://upload.wikimedia.org/wikipedia/commons/f/fa/Nax%C3%A7%C4%B1van_TV_%282025%29.png", "Rəsmi canlı səhifədən HLS yoxlanılır"),
+            "https://str2.yodacdn.net/ntv/video.m3u8",
+            "https://streams.livetv.az/azerbaijan/nax/playlist.m3u8"
+        ), "https://www.google.com/s2/favicons?domain=ntv.az&sz=256", "Rəsmi Yoda player və alternativ HLS mənbələri"),
         TvChannel("Xəzər TV", "XEZER", "Əyləncə", listOf(
-            "https://www.xezerxeber.az/stream/index.m3u8"
-        ), "https://upload.wikimedia.org/wikipedia/en/9/97/X%C9%99z%C9%99r_TV_Logo.png", "Rəsmi və alternativ canlı səhifələr yoxlanılır"),
+            "https://www.xezerxeber.az/stream/index.m3u8",
+            "https://xezerxeber.az/stream/main_stream.m3u8"
+        ), "https://upload.wikimedia.org/wikipedia/en/9/97/X%C9%99z%C9%99r_TV_Logo.png", "Bir neçə birbaşa HLS mənbə və rəsmi player"),
         TvChannel("Ayaz TV", "AYAZ", "Musiqi", listOf(
             "https://janya-ayaztv.vgcdn.net/ptnr-WebApp/title-Ayaz_TV/v1/vglive-sk-934820/main.m3u8"
         ), "https://www.google.com/s2/favicons?domain=ayaztv.az&sz=128", "720p mənbə kimi siyahılanıb"),
@@ -739,6 +770,7 @@ class MainActivity : Activity() {
     }
 
     private fun startStream(streams: List<String>, isAudio: Boolean) {
+        cancelStreamResolver()
         activeStreams = streams.distinct()
         activeStreamIndex = 0
         pageResolutionAttempted = 0
@@ -766,12 +798,12 @@ class MainActivity : Activity() {
             }
 
             val referer = streamReferer ?: when (selectedChannel?.code) {
-                "AZTV" -> "https://aztv.az/"
-                "MEDEN" -> "https://medeniyyettv.az/"
-                "NTV", "K35" -> "https://yoda.az/"
-                "XEZER" -> "https://xezerxeber.az/"
-                "ANEWZ" -> "https://anewz.tv/"
-                else -> selectedRadio?.let { "https://internationalradio.az/" }
+                "AZTV" -> "https://yodaplayer.yodacdn.net/aztvpop/index.php"
+                "MEDEN" -> "https://yodaplayer.yodacdn.net/medeniyyetpop/index.php"
+                "NTV" -> "https://yodaplayer.yodacdn.net/ntvpop/index.php"
+                "XEZER" -> "https://xezerxeber.az/en/live"
+                "ANEWZ" -> "https://cdn.maksnet.tv/em/cubesanewz-secure/?abr-app=web&streamname=live"
+                else -> selectedRadio?.let { "https://yodaplayer.yodacdn.net/radiointpop/index.php" }
             }
             val headers = mutableMapOf(
                 "Accept" to "*/*",
@@ -848,87 +880,150 @@ class MainActivity : Activity() {
     }
 
     private fun resolveHlsFromPage(pageUrl: String, callback: (String?, String?) -> Unit) {
-        resolveHlsPageRecursive(pageUrl, pageUrl, 0, HashSet(), callback)
-    }
+        cancelStreamResolver()
+        val generation = ++resolverGeneration
+        val completed = AtomicBoolean(false)
+        val webView = WebView(this)
+        resolverWebView = webView
 
-    private fun resolveHlsPageRecursive(
-        pageUrl: String,
-        rootPageUrl: String,
-        depth: Int,
-        visited: MutableSet<String>,
-        callback: (String?, String?) -> Unit
-    ) {
-        if (depth > 2 || !visited.add(pageUrl)) {
-            callback(null, null)
-            return
+        fun finish(url: String?) {
+            if (!completed.compareAndSet(false, true)) return
+            resolverHandler.post {
+                if (generation != resolverGeneration || isFinishing || isDestroyed) return@post
+                resolverTimeout?.let { resolverHandler.removeCallbacks(it) }
+                resolverTimeout = null
+                destroyResolverView()
+                callback(url, if (url.isNullOrBlank()) null else pageUrl)
+            }
         }
 
-        Thread {
-            var html = ""
-            var finalUrl = pageUrl
-            var iframeUrl: String? = null
-            var foundStream: String? = null
-            try {
-                val connection = (URL(pageUrl).openConnection() as HttpURLConnection).apply {
-                    connectTimeout = 7000
-                    readTimeout = 8000
-                    instanceFollowRedirects = true
-                    setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 11) AppleWebKit/537.36 Chrome/120 Mobile Safari/537.36")
-                    setRequestProperty("Accept", "text/html,application/xhtml+xml,*/*;q=0.8")
-                    setRequestProperty("Referer", rootPageUrl)
-                }
-                try {
-                    if (connection.responseCode in 200..299) {
-                        finalUrl = connection.url.toString()
-                        html = connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
+        webView.apply {
+            alpha = 0f
+            visibility = View.INVISIBLE
+            isFocusable = false
+            isFocusableInTouchMode = false
+            setBackgroundColor(Color.TRANSPARENT)
+            settings.javaScriptEnabled = true
+            settings.domStorageEnabled = true
+            settings.databaseEnabled = true
+            settings.mediaPlaybackRequiresUserGesture = false
+            settings.loadsImagesAutomatically = false
+            settings.blockNetworkImage = true
+            settings.mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
+            settings.userAgentString =
+                "Mozilla/5.0 (Linux; Android 11) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+            webChromeClient = WebChromeClient()
+            webViewClient = object : WebViewClient() {
+                override fun shouldInterceptRequest(
+                    view: WebView?,
+                    request: WebResourceRequest?
+                ): WebResourceResponse? {
+                    val requestUrl = request?.url?.toString().orEmpty()
+                    if (isDirectHlsUrl(requestUrl)) {
+                        finish(requestUrl)
+                        // Stop the hidden page from downloading/playing the stream itself.
+                        return WebResourceResponse(
+                            "text/plain",
+                            "UTF-8",
+                            200,
+                            "Captured by PulseAZ",
+                            mapOf("Cache-Control" to "no-store"),
+                            ByteArrayInputStream(ByteArray(0))
+                        )
                     }
-                } finally {
-                    connection.disconnect()
+                    return super.shouldInterceptRequest(view, request)
                 }
 
-                val normalized = html
-                    .replace("\\/", "/")
-                    .replace("\\u0026", "&")
-                    .replace("&amp;", "&")
-                    .replace("\\x26", "&")
-
-                val absolutePattern = Regex("""(?i)(?:https?:)?//[^"'\\s<>]+?\.m3u8(?:\?[^"'\\s<>]*)?""")
-                val rawMatch = absolutePattern.find(normalized)?.value
-                    ?.trimEnd(')', ']', '}', ',', ';', '.')
-                if (!rawMatch.isNullOrBlank()) {
-                    val candidate = if (rawMatch.startsWith("//")) "https:$rawMatch" else rawMatch
-                    if (candidate.startsWith("https://", ignoreCase = true)) foundStream = candidate
-                }
-
-                if (foundStream == null && depth < 2) {
-                    val iframePattern = Regex("""(?is)<iframe\b[^>]*?\bsrc\s*=\s*["']([^"']+)["']""")
-                    val rawIframe = iframePattern.find(normalized)?.groupValues?.getOrNull(1)
-                    if (!rawIframe.isNullOrBlank()) {
-                        val candidate = runCatching { URL(URL(finalUrl), rawIframe).toString() }.getOrNull()
-                        val host = runCatching { URL(candidate ?: "").host.lowercase() }.getOrNull().orEmpty()
-                        val rootHost = runCatching { URL(rootPageUrl).host.lowercase() }.getOrDefault("")
-                        val trustedPlayerHost = host == rootHost ||
-                            host == "yodaplayer.yodacdn.net" ||
-                            host.endsWith(".yodacdn.net") ||
-                            host == "yodacdn.net"
-                        if (!candidate.isNullOrBlank() &&
-                            candidate.startsWith("https://", ignoreCase = true) &&
-                            trustedPlayerHost
-                        ) iframeUrl = candidate
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    super.onPageFinished(view, url)
+                    if (view == null || completed.get()) return
+                    val probe = """
+                        (function() {
+                          var found = [];
+                          function add(v) {
+                            if (typeof v === 'string' && /^https:\/\//i.test(v) && /\.m3u8(?:$|[?#])/i.test(v)) {
+                              if (found.indexOf(v) < 0) found.push(v);
+                            }
+                          }
+                          document.querySelectorAll('video,source').forEach(function(e) {
+                            add(e.currentSrc); add(e.src); add(e.getAttribute('src'));
+                          });
+                          try {
+                            if (window.jwplayer) {
+                              var p = window.jwplayer();
+                              var item = p && p.getPlaylistItem && p.getPlaylistItem();
+                              if (item) { add(item.file); (item.sources || []).forEach(function(x){add(x.file);}); }
+                          } } catch(e) {}
+                          try {
+                            if (window.videojs) {
+                              document.querySelectorAll('video').forEach(function(v) {
+                                try { add(window.videojs(v).currentSrc()); } catch(e) {}
+                              });
+                            }
+                          } catch(e) {}
+                          var html = document.documentElement ? document.documentElement.innerHTML : '';
+                          var m = html.match(/https?:\\/\\/[^"'\\s<>]+?\\.m3u8(?:\\?[^"'\\s<>]*)?/i);
+                          if (m) add(m[0].replace(/\\\\\//g, '/').replace(/&amp;/g, '&'));
+                          return found.length ? found[0] : null;
+                        })();
+                    """.trimIndent()
+                    view.evaluateJavascript(probe) { raw ->
+                        val found = runCatching {
+                            org.json.JSONTokener(raw ?: "null").nextValue() as? String
+                        }.getOrNull()
+                        if (isDirectHlsUrl(found.orEmpty())) finish(found)
                     }
                 }
-            } catch (_: Exception) {
-                // Public page resolution is optional; direct stream URLs remain preferred.
-            }
 
-            when {
-                !foundStream.isNullOrBlank() -> runOnUiThread { callback(foundStream, finalUrl) }
-                !iframeUrl.isNullOrBlank() -> resolveHlsPageRecursive(
-                    iframeUrl!!, rootPageUrl, depth + 1, visited, callback
-                )
-                else -> runOnUiThread { callback(null, null) }
+                override fun onReceivedError(
+                    view: WebView?,
+                    request: WebResourceRequest?,
+                    error: android.webkit.WebResourceError?
+                ) {
+                    super.onReceivedError(view, request, error)
+                    if (request?.isForMainFrame == true && generation == resolverGeneration) {
+                        // Give a redirecting iframe a moment to load before the per-page timeout.
+                    }
+                }
             }
-        }.start()
+        }
+
+        playerFrame.addView(
+            webView,
+            FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        )
+
+        val timeout = Runnable { finish(null) }
+        resolverTimeout = timeout
+        resolverHandler.postDelayed(timeout, 12000L)
+        runCatching { webView.loadUrl(pageUrl) }.onFailure { finish(null) }
+    }
+
+    private fun isDirectHlsUrl(value: String): Boolean {
+        if (!value.startsWith("https://", ignoreCase = true)) return false
+        val parsed = runCatching { Uri.parse(value) }.getOrNull() ?: return false
+        val target = (parsed.path.orEmpty() + "?" + parsed.query.orEmpty())
+        return Regex("""(?i)\\.m3u8(?:$|[?&#])""").containsMatchIn(target)
+    }
+
+    private fun destroyResolverView() {
+        val view = resolverWebView ?: return
+        resolverWebView = null
+        runCatching {
+            (view.parent as? ViewGroup)?.removeView(view)
+            view.stopLoading()
+            view.loadUrl("about:blank")
+            view.clearHistory()
+            view.removeAllViews()
+            view.destroy()
+        }
+    }
+
+    private fun cancelStreamResolver() {
+        resolverGeneration++
+        resolverTimeout?.let { resolverHandler.removeCallbacks(it) }
+        resolverTimeout = null
+        destroyResolverView()
     }
 
     private fun showStreamError() {
@@ -1138,6 +1233,7 @@ class MainActivity : Activity() {
     }
 
     override fun onDestroy() {
+        cancelStreamResolver()
         animations.forEach { it.cancel() }
         audioAnimations.forEach { it.cancel() }
         animations.clear()
