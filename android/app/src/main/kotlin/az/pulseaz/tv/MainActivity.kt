@@ -6,7 +6,9 @@ import android.animation.ValueAnimator
 import android.app.Activity
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.net.Uri
@@ -33,8 +35,10 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import com.caverock.androidsvg.SVG
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import androidx.media3.ui.TrackSelectionDialogBuilder
@@ -59,14 +63,14 @@ private data class RadioStation(
 )
 
 class MainActivity : Activity() {
-    private val bg = Color.rgb(6, 10, 22)
-    private val panel = Color.rgb(15, 23, 42)
-    private val panelRaised = Color.rgb(23, 34, 58)
-    private val accent = Color.rgb(45, 214, 190)
-    private val accentBlue = Color.rgb(73, 151, 255)
-    private val textMain = Color.rgb(245, 248, 255)
-    private val textMuted = Color.rgb(150, 165, 190)
-    private val danger = Color.rgb(255, 115, 125)
+    private val bg = Color.rgb(5, 9, 19)
+    private val panel = Color.rgb(13, 21, 38)
+    private val panelRaised = Color.rgb(21, 32, 54)
+    private val accent = Color.rgb(0, 226, 190)
+    private val accentBlue = Color.rgb(91, 145, 255)
+    private val textMain = Color.rgb(246, 249, 255)
+    private val textMuted = Color.rgb(151, 169, 197)
+    private val danger = Color.rgb(255, 112, 132)
 
     private lateinit var playerView: PlayerView
     private lateinit var playerFrame: FrameLayout
@@ -95,11 +99,26 @@ class MainActivity : Activity() {
     private var favoritesOnly = false
     private var activeStreams: List<String> = emptyList()
     private var activeStreamIndex = 0
+    private var pageResolutionAttempted = 0
+    private var pageResolutionInProgress = false
+    private var streamReferer: String? = null
     private var resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
     private val animations = mutableListOf<Animator>()
     private val audioAnimations = mutableListOf<Animator>()
     private val logoCache = HashMap<String, Bitmap>()
+    private val svgIconCache = HashMap<String, Bitmap>()
     private val loadingLogos = HashSet<String>()
+
+    // Only inspect publicly reachable pages for openly exposed HTTPS HLS media.
+    private val resolverPages = mapOf(
+        "AZTV" to listOf("https://aztv.az/az"),
+        "MEDEN" to listOf("https://medeniyyettv.az/az"),
+        "NTV" to listOf("https://yoda.az/tv/ntv/"),
+        "K35" to listOf("https://yoda.az/tv/kanal35/"),
+        "ANEWZ" to listOf("https://anewz.tv/"),
+        "XEZER" to listOf("https://xezerxeber.az/en/live", "https://yoda.az/tv/xazartv/"),
+        "AZINT" to listOf("https://internationalradio.az/az")
+    )
     private val favorites by lazy { getSharedPreferences("pulseaz_tv", MODE_PRIVATE) }
 
     private val channels = listOf(
@@ -112,7 +131,7 @@ class MainActivity : Activity() {
         ), "https://www.google.com/s2/favicons?domain=baku.tv&sz=128", "Canlı yayım"),
         TvChannel("AnewZ", "ANEWZ", "Xəbər", listOf(
             "https://53be5ef2d13aa.streamlock.net/cubesanewz-secure/smil:cubesanewz-secure-web.smil/playlist.m3u8"
-        ), "https://www.google.com/s2/favicons?domain=anewz.tv&sz=128", "Canlı yayım"),
+        ), "https://www.google.com/s2/favicons?domain=anewz.tv&sz=256", "Rəsmi səhifədən HLS yoxlanılır"),
         TvChannel("İctimai TV", "ITV", "Xəbər", listOf(
             "https://live.itv.az/itv.m3u8"
         ), "https://www.google.com/s2/favicons?domain=itv.az&sz=128", "Canlı yayım"),
@@ -121,16 +140,17 @@ class MainActivity : Activity() {
         ), "https://www.google.com/s2/favicons?domain=eltv.az&sz=128", "Bəzi vaxtlarda yayım olmaya bilər"),
         TvChannel("Kanal 35", "K35", "Regional", listOf(
             "https://str2.yodacdn.net/kanal35/index.m3u8"
-        ), "https://www.google.com/s2/favicons?domain=kanal35.az&sz=128", "720p mənbə kimi siyahılanıb"),
+        ), "https://www.google.com/s2/favicons?domain=kanal35.az&sz=256", "Açıq HLS mənbə yoxlanılır"),
         TvChannel("Kanal S", "KANALS", "Regional", listOf(
             "https://lives.atv.az:5443/KANAL-S/streams/kanals.m3u8"
         ), "https://www.google.com/s2/favicons?domain=kanals.az&sz=128", "Canlı yayım"),
         TvChannel("Mədəniyyət TV", "MEDEN", "Mədəniyyət", listOf(
-            "https://str.yodacdn.net/medeniyyettele/index.m3u8"
-        ), "https://www.google.com/s2/favicons?domain=aztv.az&sz=128", "1080p mənbə kimi siyahılanıb"),
+            "https://str.yodacdn.net/medeniyyettele/index.m3u8",
+            "https://str.yodacdn.net/medeniyyet/index.m3u8"
+        ), "https://www.google.com/s2/favicons?domain=medeniyyettv.az&sz=256", "Açıq HLS mənbələri yoxlanılır"),
         TvChannel("Naxçıvan TV", "NTV", "Regional", listOf(
             "https://str2.yodacdn.net/ntv/video.m3u8"
-        ), "https://www.google.com/s2/favicons?domain=ntv.az&sz=128", "720p mənbə kimi siyahılanıb"),
+        ), "https://www.google.com/s2/favicons?domain=ntv.az&sz=256", "Açıq HLS mənbə yoxlanılır"),
         TvChannel("Xəzər TV", "XEZER", "Əyləncə", listOf(
             "https://www.xezerxeber.az/stream/index.m3u8"
         ), "https://www.google.com/s2/favicons?domain=xezerxeber.az&sz=128", "720p mənbə kimi siyahılanıb"),
@@ -148,7 +168,7 @@ class MainActivity : Activity() {
         ), "https://www.google.com/s2/favicons?domain=itv.az&sz=128"),
         RadioStation("Azərbaycan Beynəlxalq Radiosu", "AZINT", "Milli", listOf(
             "https://str.yodacdn.net/radio_int/tracks-a1/mono.m3u8"
-        ), "https://www.google.com/s2/favicons?domain=aztv.az&sz=128"),
+        ), "https://www.google.com/s2/favicons?domain=internationalradio.az&sz=256"),
         RadioStation("Araz FM · 103.3", "ARAZ", "Musiqi", listOf(
             "https://s14.myradiostream.com/30454/listen.mp3"
         ), "https://www.google.com/s2/favicons?domain=arazfm.az&sz=128"),
@@ -195,12 +215,17 @@ class MainActivity : Activity() {
         buildScreen()
 
         val httpFactory = DefaultHttpDataSource.Factory()
-            .setUserAgent("Mozilla/5.0 (Linux; Android 11) PulseAZTV/1.1")
-            .setConnectTimeoutMs(12000)
-            .setReadTimeoutMs(20000)
+            .setUserAgent("Mozilla/5.0 (Linux; Android 11) AppleWebKit/537.36 Chrome/120 Mobile Safari/537.36 PulseAZTV/1.2")
+            .setConnectTimeoutMs(9000)
+            .setReadTimeoutMs(16000)
             .setAllowCrossProtocolRedirects(true)
 
+        val loadControl = DefaultLoadControl.Builder()
+            .setBufferDurationsMs(2500, 15000, 1000, 2500)
+            .build()
+
         player = ExoPlayer.Builder(this)
+            .setLoadControl(loadControl)
             .setMediaSourceFactory(DefaultMediaSourceFactory(httpFactory))
             .build()
 
@@ -227,7 +252,9 @@ class MainActivity : Activity() {
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 if (::playPauseButton.isInitialized) {
-                    playPauseButton.text = if (isPlaying) "Ⅱ  Dayandır" else "▶  Davam et"
+                    playPauseButton.text = if (isPlaying) "Dayandır" else "Davam et"
+                    applySvgIcon(playPauseButton, if (isPlaying) "pause" else "play",
+                        if (isPlaying) Color.rgb(5, 24, 31) else accent)
                 }
             }
         })
@@ -239,7 +266,7 @@ class MainActivity : Activity() {
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             background = gradient(
-                intArrayOf(Color.rgb(7, 13, 29), Color.rgb(8, 17, 34), Color.rgb(10, 12, 28)),
+                intArrayOf(Color.rgb(5, 9, 19), Color.rgb(8, 18, 35), Color.rgb(13, 13, 34)),
                 0
             )
         }
@@ -279,7 +306,7 @@ class MainActivity : Activity() {
             setPadding(dp(16), dp(3), dp(16), dp(26))
         }
 
-        val welcome = label("Bir toxunuşla canlı yayım.", 15f, textMuted, false)
+        val welcome = label("Canlı TV və radio — bir toxunuşla.", 15f, textMuted, false)
         welcome.setPadding(dp(3), 0, dp(3), dp(12))
         column.addView(welcome)
 
@@ -380,11 +407,13 @@ class MainActivity : Activity() {
             gravity = Gravity.CENTER_VERTICAL
             setPadding(0, dp(12), 0, dp(12))
         }
-        qualityButton = action("⚙  Keyfiyyət", panelRaised, accent).apply {
+        qualityButton = action("Keyfiyyət", panelRaised, accent).apply {
+            applySvgIcon(this, "settings", accent)
             setOnClickListener { showQualityDialog() }
         }
         controls.addView(qualityButton, weightedButtonParams())
-        fitButton = action("▣  Ölçü: FIT", panelRaised, textMain).apply {
+        fitButton = action("Ölçü: FIT", panelRaised, textMain).apply {
+            applySvgIcon(this, "fit", textMain)
             setOnClickListener { cycleResizeMode() }
         }
         val fitParams = weightedButtonParams()
@@ -396,11 +425,13 @@ class MainActivity : Activity() {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
         }
-        playPauseButton = action("▶  Başlat", accent, Color.rgb(5, 24, 31)).apply {
+        playPauseButton = action("Başlat", accent, Color.rgb(5, 24, 31)).apply {
+            applySvgIcon(this, "play", Color.rgb(5, 24, 31))
             setOnClickListener { togglePlayback() }
         }
         playbackControls.addView(playPauseButton, weightedButtonParams())
-        retryButton = action("↻  Yenidən yoxla", panelRaised, textMain).apply {
+        retryButton = action("Yenidən yoxla", panelRaised, textMain).apply {
+            applySvgIcon(this, "refresh", textMain)
             visibility = View.GONE
             setOnClickListener { retryCurrentSource() }
         }
@@ -414,8 +445,9 @@ class MainActivity : Activity() {
             background = rounded(panel, 16)
             setPadding(dp(4), dp(4), dp(4), dp(4))
         }
-        tabTv = label("▣  TELEVİZİYA", 11f, textMain, true).apply {
+        tabTv = label("TELEVİZİYA", 11f, textMain, true).apply {
             gravity = Gravity.CENTER
+            applySvgIcon(this, "tv", accent)
             setPadding(dp(6), dp(13), dp(6), dp(13))
             setOnClickListener {
                 selectedTab = "tv"
@@ -424,8 +456,9 @@ class MainActivity : Activity() {
                 renderItems()
             }
         }
-        tabRadio = label("♫  RADİO", 11f, textMuted, true).apply {
+        tabRadio = label("RADİO", 11f, textMuted, true).apply {
             gravity = Gravity.CENTER
+            applySvgIcon(this, "radio", accent)
             setPadding(dp(6), dp(13), dp(6), dp(13))
             setOnClickListener {
                 selectedTab = "radio"
@@ -577,9 +610,10 @@ class MainActivity : Activity() {
             filterRow.addView(chip, lp)
         }
         val selected = favoritesOnly
-        val fav = label(if (selected) "★ Seçilənlər" else "☆ Seçilənlər", 11f,
+        val fav = label("Seçilənlər", 11f,
             if (selected) Color.rgb(5, 25, 33) else textMuted, true).apply {
             background = rounded(if (selected) accent else panel, 30)
+            applySvgIcon(this, "heart", if (selected) Color.rgb(5, 25, 33) else textMuted, 15)
             setPadding(dp(14), dp(9), dp(14), dp(9))
             setOnClickListener {
                 favoritesOnly = !favoritesOnly
@@ -615,7 +649,13 @@ class MainActivity : Activity() {
         val card = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            background = rounded(panel, 17)
+            background = GradientDrawable(
+                GradientDrawable.Orientation.LEFT_RIGHT,
+                intArrayOf(Color.rgb(14, 25, 44), Color.rgb(18, 29, 51))
+            ).apply {
+                cornerRadius = dp(17).toFloat()
+                setStroke(dp(1), Color.argb(75, 91, 145, 185))
+            }
             setPadding(dp(12), dp(11), dp(10), dp(11))
             isClickable = true
             isFocusable = true
@@ -628,9 +668,10 @@ class MainActivity : Activity() {
                 dp(14)
             )
         }
-        val fallback = label(if (isTv) code.take(4) else "♫", 12f, textMain, true).apply {
+        val fallback = label(if (isTv) code.take(4) else "RADIO", 10f, textMain, true).apply {
             gravity = Gravity.CENTER
         }
+        if (!isTv) applySvgIcon(fallback, "radio", textMain, 16)
         iconFrame.addView(fallback, FrameLayout.LayoutParams(
             dp(58), dp(58), Gravity.CENTER
         ))
@@ -654,13 +695,12 @@ class MainActivity : Activity() {
 
         val saved = favorites.getStringSet("favorites", emptySet()) ?: emptySet()
         val favKey = (if (isTv) "TV_" else "RADIO_") + code
-        val favorite = label(if (saved.contains(favKey)) "★" else "☆", 22f,
+        val favorite = label("", 18f,
             if (saved.contains(favKey)) accent else textMuted, true).apply {
             gravity = Gravity.CENTER
             setPadding(dp(8), dp(5), dp(7), dp(5))
-            setOnClickListener {
-                onFavorite()
-            }
+            applySvgIcon(this, "heart", if (saved.contains(favKey)) accent else textMuted, 20)
+            setOnClickListener { onFavorite() }
         }
         card.addView(favorite, LinearLayout.LayoutParams(dp(40), dp(48)))
         return card
@@ -698,16 +738,24 @@ class MainActivity : Activity() {
     }
 
     private fun startStream(streams: List<String>, isAudio: Boolean) {
-        activeStreams = streams
+        activeStreams = streams.distinct()
         activeStreamIndex = 0
+        pageResolutionAttempted = 0
+        pageResolutionInProgress = false
+        streamReferer = null
         playStreamAtIndex(isAudio)
     }
 
     private fun playStreamAtIndex(isAudio: Boolean) {
         val url = activeStreams.getOrNull(activeStreamIndex) ?: run {
-            showStreamError()
+            tryNextSource()
             return
         }
+        if (!url.startsWith("https://", ignoreCase = true)) {
+            tryNextSource()
+            return
+        }
+
         try {
             val builder = MediaItem.Builder().setUri(Uri.parse(url))
             if (url.contains(".m3u8", ignoreCase = true)) {
@@ -715,10 +763,40 @@ class MainActivity : Activity() {
             } else if (isAudio) {
                 builder.setMimeType(MimeTypes.AUDIO_MPEG)
             }
+
+            val referer = streamReferer ?: when (selectedChannel?.code) {
+                "AZTV" -> "https://aztv.az/"
+                "MEDEN" -> "https://medeniyyettv.az/"
+                "NTV", "K35" -> "https://yoda.az/"
+                "XEZER" -> "https://xezerxeber.az/"
+                "ANEWZ" -> "https://anewz.tv/"
+                else -> selectedRadio?.let { "https://internationalradio.az/" }
+            }
+            val headers = mutableMapOf(
+                "Accept" to "*/*",
+                "Accept-Language" to "az,en-US;q=0.9,en;q=0.8"
+            )
+            if (!referer.isNullOrBlank()) {
+                headers["Referer"] = referer
+                val origin = runCatching {
+                    val parsed = URL(referer)
+                    parsed.protocol + "://" + parsed.host
+                }.getOrNull()
+                if (!origin.isNullOrBlank()) headers["Origin"] = origin
+            }
+
+            val sourceFactory = DefaultHttpDataSource.Factory()
+                .setUserAgent("Mozilla/5.0 (Linux; Android 11) AppleWebKit/537.36 Chrome/120 Mobile Safari/537.36 PulseAZTV/1.2")
+                .setConnectTimeoutMs(9000)
+                .setReadTimeoutMs(16000)
+                .setAllowCrossProtocolRedirects(true)
+                .setDefaultRequestProperties(headers)
+
+            val source = DefaultMediaSourceFactory(sourceFactory).createMediaSource(builder.build())
             player?.apply {
                 stop()
                 clearMediaItems()
-                setMediaItem(builder.build())
+                setMediaSource(source)
                 prepare()
                 playWhenReady = true
             }
@@ -730,11 +808,124 @@ class MainActivity : Activity() {
     private fun tryNextSource() {
         if (activeStreamIndex + 1 < activeStreams.size) {
             activeStreamIndex++
-            statusText.text = "Alternativ yayım ünvanı yoxlanılır…"
+            streamReferer = null
+            statusText.text = "Alternativ yayım mənbəyi yoxlanılır…"
             playStreamAtIndex(selectedRadio != null)
-        } else {
-            showStreamError()
+            return
         }
+
+        val code = selectedChannel?.code ?: selectedRadio?.code ?: return showStreamError()
+        val pages = resolverPages[code].orEmpty()
+        if (pageResolutionInProgress) return
+        val page = pages.getOrNull(pageResolutionAttempted)
+        if (page == null) {
+            showStreamError()
+            return
+        }
+
+        pageResolutionAttempted++
+        pageResolutionInProgress = true
+        statusText.setTextColor(textMuted)
+        statusText.text = "Rəsmi səhifədə açıq HLS yayımı axtarılır…"
+        resolveHlsFromPage(page) { streamUrl, referer ->
+            runOnUiThread {
+                pageResolutionInProgress = false
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                if (!streamUrl.isNullOrBlank()) {
+                    streamReferer = referer ?: page
+                    activeStreams = activeStreams + streamUrl
+                    activeStreamIndex = activeStreams.lastIndex
+                    statusText.text = "Tapılan yayım player-ə qoşulur…"
+                    playStreamAtIndex(selectedRadio != null)
+                } else {
+                    tryNextSource()
+                }
+            }
+        }
+    }
+
+    private fun resolveHlsFromPage(pageUrl: String, callback: (String?, String?) -> Unit) {
+        resolveHlsPageRecursive(pageUrl, pageUrl, 0, HashSet(), callback)
+    }
+
+    private fun resolveHlsPageRecursive(
+        pageUrl: String,
+        rootPageUrl: String,
+        depth: Int,
+        visited: MutableSet<String>,
+        callback: (String?, String?) -> Unit
+    ) {
+        if (depth > 2 || !visited.add(pageUrl)) {
+            callback(null, null)
+            return
+        }
+
+        Thread {
+            var html = ""
+            var finalUrl = pageUrl
+            var iframeUrl: String? = null
+            var foundStream: String? = null
+            try {
+                val connection = (URL(pageUrl).openConnection() as HttpURLConnection).apply {
+                    connectTimeout = 7000
+                    readTimeout = 8000
+                    instanceFollowRedirects = true
+                    setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 11) AppleWebKit/537.36 Chrome/120 Mobile Safari/537.36")
+                    setRequestProperty("Accept", "text/html,application/xhtml+xml,*/*;q=0.8")
+                    setRequestProperty("Referer", rootPageUrl)
+                }
+                try {
+                    if (connection.responseCode in 200..299) {
+                        finalUrl = connection.url.toString()
+                        html = connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
+                    }
+                } finally {
+                    connection.disconnect()
+                }
+
+                val normalized = html
+                    .replace("\\/", "/")
+                    .replace("\\u0026", "&")
+                    .replace("&amp;", "&")
+                    .replace("\\x26", "&")
+
+                val absolutePattern = Regex("""(?i)(?:https?:)?//[^"'\\s<>]+?\.m3u8(?:\?[^"'\\s<>]*)?""")
+                val rawMatch = absolutePattern.find(normalized)?.value
+                    ?.trimEnd(')', ']', '}', ',', ';', '.')
+                if (!rawMatch.isNullOrBlank()) {
+                    val candidate = if (rawMatch.startsWith("//")) "https:$rawMatch" else rawMatch
+                    if (candidate.startsWith("https://", ignoreCase = true)) foundStream = candidate
+                }
+
+                if (foundStream == null && depth < 2) {
+                    val iframePattern = Regex("""(?is)<iframe\b[^>]*?\bsrc\s*=\s*["']([^"']+)["']""")
+                    val rawIframe = iframePattern.find(normalized)?.groupValues?.getOrNull(1)
+                    if (!rawIframe.isNullOrBlank()) {
+                        val candidate = runCatching { URL(URL(finalUrl), rawIframe).toString() }.getOrNull()
+                        val host = runCatching { URL(candidate ?: "").host.lowercase() }.getOrNull().orEmpty()
+                        val rootHost = runCatching { URL(rootPageUrl).host.lowercase() }.getOrDefault("")
+                        val trustedPlayerHost = host == rootHost ||
+                            host == "yodaplayer.yodacdn.net" ||
+                            host.endsWith(".yodacdn.net") ||
+                            host == "yodacdn.net"
+                        if (!candidate.isNullOrBlank() &&
+                            candidate.startsWith("https://", ignoreCase = true) &&
+                            trustedPlayerHost
+                        ) iframeUrl = candidate
+                    }
+                }
+            } catch (_: Exception) {
+                // Public page resolution is optional; direct stream URLs remain preferred.
+            }
+
+            when {
+                !foundStream.isNullOrBlank() -> runOnUiThread { callback(foundStream, finalUrl) }
+                !iframeUrl.isNullOrBlank() -> resolveHlsPageRecursive(
+                    iframeUrl!!, rootPageUrl, depth + 1, visited, callback
+                )
+                else -> runOnUiThread { callback(null, null) }
+            }
+        }.start()
     }
 
     private fun showStreamError() {
@@ -792,10 +983,11 @@ class MainActivity : Activity() {
         }
         playerView.resizeMode = resizeMode
         fitButton.text = when (resizeMode) {
-            AspectRatioFrameLayout.RESIZE_MODE_ZOOM -> "▣  Ölçü: ZOOM"
-            AspectRatioFrameLayout.RESIZE_MODE_FILL -> "▣  Ölçü: FILL"
-            else -> "▣  Ölçü: FIT"
+            AspectRatioFrameLayout.RESIZE_MODE_ZOOM -> "Ölçü: ZOOM"
+            AspectRatioFrameLayout.RESIZE_MODE_FILL -> "Ölçü: FILL"
+            else -> "Ölçü: FIT"
         }
+        applySvgIcon(fitButton, "fit", textMain)
     }
 
     private fun toggleFavorite(key: String) {
@@ -817,24 +1009,39 @@ class MainActivity : Activity() {
             if (!loadingLogos.add(url)) return
         }
 
+        val domain = Uri.parse(url).getQueryParameter("domain")
+            ?: runCatching { Uri.parse(url).host }.getOrNull().orEmpty()
+        val candidates = listOf(
+            url,
+            "https://www.google.com/s2/favicons?domain=$domain&sz=256",
+            "https://icons.duckduckgo.com/ip3/$domain.ico"
+        ).distinct()
+
         Thread {
-            var connection: HttpURLConnection? = null
             var bitmap: Bitmap? = null
-            try {
-                connection = (URL(url).openConnection() as HttpURLConnection).apply {
-                    connectTimeout = 5000
-                    readTimeout = 5000
-                    setRequestProperty("User-Agent", "PulseAZTV/1.1 Android")
+            for (candidate in candidates) {
+                var connection: HttpURLConnection? = null
+                try {
+                    connection = (URL(candidate).openConnection() as HttpURLConnection).apply {
+                        connectTimeout = 4500
+                        readTimeout = 4500
+                        instanceFollowRedirects = true
+                        setRequestProperty("User-Agent", "Mozilla/5.0 PulseAZTV/1.2")
+                    }
+                    if (connection.responseCode in 200..299) {
+                        connection.inputStream.use { bitmap = BitmapFactory.decodeStream(it) }
+                    }
+                } catch (_: Exception) {
+                    bitmap = null
+                } finally {
+                    connection?.disconnect()
                 }
-                connection.inputStream.use { bitmap = BitmapFactory.decodeStream(it) }
-            } catch (_: Exception) {
-                bitmap = null
-            } finally {
-                connection?.disconnect()
-                synchronized(logoCache) {
-                    loadingLogos.remove(url)
-                    if (bitmap != null) logoCache[url] = bitmap!!
-                }
+                if (bitmap != null) break
+            }
+
+            synchronized(logoCache) {
+                loadingLogos.remove(url)
+                if (bitmap != null) logoCache[url] = bitmap!!
             }
             bitmap?.let { loaded ->
                 image.post {
@@ -844,6 +1051,32 @@ class MainActivity : Activity() {
                 }
             }
         }.start()
+    }
+
+    private fun applySvgIcon(view: TextView, name: String, tint: Int, sizeDp: Int = 18) {
+        val cacheKey = "$name:$tint"
+        val bitmap = synchronized(svgIconCache) {
+            svgIconCache[cacheKey] ?: try {
+                val svgText = assets.open("icons/$name.svg").bufferedReader().use { it.readText() }
+                val color = String.format("#%06X", 0xFFFFFF and tint)
+                val svg = SVG.getFromString(svgText.replace("#FFFFFF", color))
+                val pixels = dp(64)
+                svg.documentWidth = pixels.toFloat()
+                svg.documentHeight = pixels.toFloat()
+                Bitmap.createBitmap(pixels, pixels, Bitmap.Config.ARGB_8888).also { output ->
+                    svg.renderToCanvas(Canvas(output))
+                    svgIconCache[cacheKey] = output
+                }
+            } catch (_: Exception) {
+                null
+            }
+        } ?: return
+
+        val drawable = BitmapDrawable(resources, bitmap).apply {
+            setBounds(0, 0, dp(sizeDp), dp(sizeDp))
+        }
+        view.setCompoundDrawablesRelative(drawable, null, null, null)
+        view.compoundDrawablePadding = dp(7)
     }
 
     private fun pulse(view: View) {
