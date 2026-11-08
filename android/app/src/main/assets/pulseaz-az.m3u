@@ -1,13 +1,15 @@
 #EXTM3U
-# PulseAZ TV 1.3 — public direct HLS candidates; native Android player also captures open HLS requests from invisible official-player pages.
+# PulseAZ TV 1.4 — public HLS candidates plus continuous discovery from invisible official players.
 # TV candidates are listed in the community-maintained iptv-org Azerbaijan list:
 # https://github.com/iptv-org/iptv/blob/master/streams/az.m3u
 # Radio candidates are listed as direct HTTPS streams in the Azerbaijan station directory:
 # https://www.freqtrail.com/stations/AZ
-# Broadcaster webpages are never displayed. Their public player is probed invisibly and only an exposed HTTPS HLS URL is handed to Media3.
+# Broadcaster pages are never displayed. A transparent hidden probe monitors official players for exposed HTTPS HLS and hands it to native Media3.
 # Links may change or be restricted by operators; availability is not guaranteed.
 
-#EXTINF:-1 tvg-id="AzTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=aztv.az&sz=256" group-title="TV | Xəbər",AzTV
+#EXTINF:-1 tvg-id="AzTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=aztv.az&sz=256" group-title="TV | Xəbər",AzTV (Yoda)
+https://str.yodacdn.net/aztv/index.m3u8
+#EXTINF:-1 tvg-id="AzTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=aztv.az&sz=256" group-title="TV | Xəbər",AzTV (alternate)
 https://str.yodacdn.net/azertv/index.m3u8
 #EXTINF:-1 tvg-id="BakuTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=baku.tv&sz=128" group-title="TV | Xəbər",Baku TV
 https://rtmp.baku.tv/hls/bakutv.m3u8
@@ -19,7 +21,9 @@ https://live.itv.az/itv.m3u8
 https://live.eltv.az/live/eltv/playlist.m3u8
 #EXTINF:-1 tvg-id="KanalS.az" tvg-logo="https://www.google.com/s2/favicons?domain=kanals.az&sz=128" group-title="TV | Regional",Kanal S
 https://lives.atv.az:5443/KANAL-S/streams/kanals.m3u8
-#EXTINF:-1 tvg-id="MedeniyyetTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=medeniyyettv.az&sz=256" group-title="TV | Mədəniyyət",Mədəniyyət TV
+#EXTINF:-1 tvg-id="MedeniyyetTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=medeniyyettv.az&sz=256" group-title="TV | Mədəniyyət",Mədəniyyət TV (Yoda)
+https://str.yodacdn.net/medeniyyet/index.m3u8
+#EXTINF:-1 tvg-id="MedeniyyetTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=medeniyyettv.az&sz=256" group-title="TV | Mədəniyyət",Mədəniyyət TV (alternate)
 https://str.yodacdn.net/medeniyyettele/index.m3u8
 #EXTINF:-1 tvg-id="MedeniyyetTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=medeniyyettv.az&sz=256" group-title="TV | Mədəniyyət",Mədəniyyət TV (alternative)
 https://streams.livetv.az/azerbaijan/medeniyyet_stream2/playlist.m3u8
@@ -38,7 +42,9 @@ https://nl.livekadeh.com/hls2/vilayet.m3u8
 
 #EXTINF:-1 tvg-id="IctimaiRadio.az" tvg-logo="https://www.google.com/s2/favicons?domain=itv.az&sz=128" group-title="Radio | Xəbər",İctimai Radio 90 FM
 https://stream.itv.az/rtmp:/radio/playlist.m3u8
-#EXTINF:-1 tvg-id="AzerbaijanInternationalRadio.az" tvg-logo="https://www.google.com/s2/favicons?domain=internationalradio.az&sz=256" group-title="Radio | Milli",Azərbaycan Beynəlxalq Radiosu
+#EXTINF:-1 tvg-id="AzerbaijanInternationalRadio.az" tvg-logo="https://www.google.com/s2/favicons?domain=internationalradio.az&sz=256" group-title="Radio | Milli",Azərbaycan Beynəlxalq Radiosu (Yoda)
+https://str.yodacdn.net/radio_int/tracks-v1a1/mono.m3u8
+#EXTINF:-1 tvg-id="AzerbaijanInternationalRadio.az" tvg-logo="https://www.google.com/s2/favicons?domain=internationalradio.az&sz=256" group-title="Radio | Milli",Azərbaycan Beynəlxalq Radiosu (alternate)
 https://str.yodacdn.net/radio_int/tracks-a1/mono.m3u8
 #EXTINF:-1 tvg-id="ArazFM.az" tvg-logo="https://www.google.com/s2/favicons?domain=arazfm.az&sz=128" group-title="Radio | Musiqi",Araz FM 103.3
 https://s14.myradiostream.com/30454/listen.mp3
