@@ -371,6 +371,7 @@ class MainActivity : Activity() {
                 }
                 selectedRadio?.let { station ->
                     playbackService?.updateRadioNotification(station.name, isPlaying)
+                    if (!isPlaying) stopService(Intent(this@MainActivity, PulsePlaybackService::class.java))
                 }
             }
         }
@@ -723,7 +724,7 @@ class MainActivity : Activity() {
         sectionLabel.text = if (isTv) "CANLI KANALLAR" else "RADİO STANSİYALARI"
 
         val categories = if (isTv) {
-            listOf("Hamısı", "Xəbər", "Regional", "Əyləncə", "Mədəniyyət", "Musiqi")
+            listOf("Hamısı", "Xəbər", "Regional", "Əyləncə", "Mədəniyyət", "Musiqi", "İdman", "Biznes")
         } else {
             listOf("Hamısı", "Musiqi", "Xəbər", "Milli")
         }
@@ -1058,6 +1059,7 @@ class MainActivity : Activity() {
         guideButton.visibility = if (channel.guideUrl.isNullOrBlank()) View.GONE else View.VISIBLE
         rememberRecent("TV_" + channel.code)
         playbackService?.updateRadioNotification(channel.name, false)
+        stopService(Intent(this, PulsePlaybackService::class.java))
         statusText.text = "Yayım bağlantısı yoxlanılır…"
         startStream(channel.streams, false)
     }
@@ -1731,6 +1733,7 @@ class MainActivity : Activity() {
         if (activePlayer.isPlaying) {
             activePlayer.pause()
         } else {
+            selectedRadio?.let { startRadioForeground(it.name) }
             activePlayer.play()
         }
     }
