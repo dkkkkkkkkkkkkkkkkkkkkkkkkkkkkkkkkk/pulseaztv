@@ -968,14 +968,35 @@ class MainActivity : Activity() {
                   if (found.indexOf(v) < 0) found.push(v);
                 }
               }
+              // Some official players create their HLS request only after a play action.
+              // Channel selection in PulseAZ is the user's play intent, so start this hidden probe muted.
+              function startVideo(v) {
+                try {
+                  if (!v || typeof v.play !== 'function') return;
+                  v.muted = true;
+                  v.playsInline = true;
+                  var p = v.play();
+                  if (p && typeof p.catch === 'function') p.catch(function(){});
+                } catch(e) {}
+              }
               document.querySelectorAll('video,source').forEach(function(e) {
                 add(e.currentSrc); add(e.src); add(e.getAttribute('src'));
+                if (e.tagName && e.tagName.toLowerCase() === 'video') startVideo(e);
+              });
+              // If the site exposes a visible player control rather than HTML5 autoplay, trigger play.
+              document.querySelectorAll('button,[role="button"]').forEach(function(b) {
+                try {
+                  var t = ((b.getAttribute('aria-label') || '') + ' ' +
+                    (b.getAttribute('title') || '') + ' ' + (b.innerText || '')).toLowerCase();
+                  if (/play|start|watch live|canlı izlə|izlə/.test(t)) b.click();
+                } catch(e) {}
               });
               try {
                 if (window.jwplayer) {
                   document.querySelectorAll('[id]').forEach(function(el) {
                     try {
                       var p = window.jwplayer(el.id);
+                      try { if (p && p.play) p.play(); } catch(e) {}
                       var item = p && p.getPlaylistItem && p.getPlaylistItem();
                       if (item) { add(item.file); (item.sources || []).forEach(function(x){add(x.file);}); }
                     } catch(e) {}
@@ -985,7 +1006,11 @@ class MainActivity : Activity() {
               try {
                 if (window.videojs) {
                   document.querySelectorAll('video').forEach(function(v) {
-                    try { add(window.videojs(v).currentSrc()); } catch(e) {}
+                    try {
+                      var player = window.videojs(v);
+                      add(player.currentSrc());
+                      try { var p = player.play(); if (p && p.catch) p.catch(function(){}); } catch(e) {}
+                    } catch(e) {}
                   });
                 }
               } catch(e) {}
