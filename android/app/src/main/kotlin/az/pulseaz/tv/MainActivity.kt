@@ -314,6 +314,7 @@ class MainActivity : Activity() {
                 0
             )
         }
+        animateAmbientBackground(root)
 
         val header = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -1326,6 +1327,42 @@ class MainActivity : Activity() {
         }
         view.setCompoundDrawablesRelative(drawable, null, null, null)
         view.compoundDrawablePadding = dp(7)
+    }
+
+    private fun animateAmbientBackground(view: View) {
+        val from = intArrayOf(
+            Color.rgb(5, 9, 19),
+            Color.rgb(8, 18, 35),
+            Color.rgb(13, 13, 34)
+        )
+        val to = intArrayOf(
+            Color.rgb(7, 13, 27),
+            Color.rgb(10, 22, 42),
+            Color.rgb(17, 15, 39)
+        )
+        val animator = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 14000L
+            repeatCount = ValueAnimator.INFINITE
+            repeatMode = ValueAnimator.REVERSE
+            addUpdateListener { animation ->
+                val amount = animation.animatedValue as Float
+                val colors = IntArray(from.size) { index ->
+                    blendColor(from[index], to[index], amount)
+                }
+                view.background = gradient(colors, 0)
+            }
+        }
+        animations.add(animator)
+        animator.start()
+    }
+
+    private fun blendColor(start: Int, end: Int, amount: Float): Int {
+        val t = amount.coerceIn(0f, 1f)
+        return Color.rgb(
+            (Color.red(start) + (Color.red(end) - Color.red(start)) * t).toInt(),
+            (Color.green(start) + (Color.green(end) - Color.green(start)) * t).toInt(),
+            (Color.blue(start) + (Color.blue(end) - Color.blue(start)) * t).toInt()
+        )
     }
 
     private fun pulse(view: View) {
