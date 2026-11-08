@@ -56,6 +56,7 @@ class MainActivity : Activity() {
     private lateinit var titleText: TextView
     private lateinit var statusText: TextView
     private lateinit var officialButton: TextView
+    private lateinit var emptyPlayerHint: TextView
     private lateinit var searchBox: EditText
     private lateinit var channelList: LinearLayout
     private lateinit var filterRow: LinearLayout
@@ -115,6 +116,8 @@ class MainActivity : Activity() {
 
             override fun onPlayerError(error: PlaybackException) {
                 statusText.text = "Bu yayım hazırda açılmadı. Rəsmi səhifəni yoxla."
+                emptyPlayerHint.text = "YAYIM AÇILMADI"
+                emptyPlayerHint.visibility = View.VISIBLE
                 officialButton.visibility = View.VISIBLE
             }
         })
@@ -145,7 +148,7 @@ class MainActivity : Activity() {
         val brandParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
         brandParams.marginStart = dp(10)
         header.addView(brandColumn, brandParams)
-        val livePill = text("● CANLI", 11f, cyan, true).apply {
+        val livePill = text("AZ · TV", 11f, cyan, true).apply {
             background = rounded(Color.rgb(14, 55, 71), 30)
             setPadding(dp(12), dp(8), dp(12), dp(8))
         }
@@ -176,12 +179,12 @@ class MainActivity : Activity() {
         playerFrame.addView(playerView, FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, dp(218)
         ))
-        val playHint = text("KANAL SEÇ", 12f, muted, true).apply {
+        emptyPlayerHint = text("KANAL SEÇ", 12f, muted, true).apply {
             gravity = Gravity.CENTER
             setBackgroundColor(Color.TRANSPARENT)
             isClickable = false
         }
-        playerFrame.addView(playHint, FrameLayout.LayoutParams(
+        playerFrame.addView(emptyPlayerHint, FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, dp(218)
         ))
         column.addView(playerFrame)
@@ -379,11 +382,14 @@ class MainActivity : Activity() {
         officialButton.visibility = View.VISIBLE
         officialButton.text = "Rəsmi səhifəni aç  ↗"
         if (channel.streamUrl.isNullOrBlank()) {
+            emptyPlayerHint.text = "BİRBAŞA HLS YOXDUR"
+            emptyPlayerHint.visibility = View.VISIBLE
             statusText.text = "Birbaşa HLS ünvanı əlavə edilməyib. Rəsmi yayım səhifəsini aça bilərsən."
             player?.pause()
             return
         }
         statusText.text = "Yayım bağlantısı yoxlanılır…"
+        emptyPlayerHint.visibility = View.GONE
         try {
             val mediaItem = MediaItem.Builder()
                 .setUri(channel.streamUrl)
