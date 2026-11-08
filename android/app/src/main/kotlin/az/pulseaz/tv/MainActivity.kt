@@ -987,10 +987,11 @@ class MainActivity : Activity() {
 
         try {
             val builder = MediaItem.Builder().setUri(Uri.parse(url))
-            if (url.contains(".m3u8", ignoreCase = true)) {
-                builder.setMimeType(MimeTypes.APPLICATION_M3U8)
-            } else if (isAudio) {
-                builder.setMimeType(MimeTypes.AUDIO_MPEG)
+            val mediaPath = Uri.parse(url).path.orEmpty().lowercase()
+            when {
+                mediaPath.endsWith(".m3u8") -> builder.setMimeType(MimeTypes.APPLICATION_M3U8)
+                mediaPath.endsWith(".mpd") -> builder.setMimeType(MimeTypes.APPLICATION_MPD)
+                mediaPath.endsWith(".mp3") || isAudio -> builder.setMimeType(MimeTypes.AUDIO_MPEG)
             }
 
             val referer = streamRequestHeaders["Referer"] ?: streamReferer ?: when (selectedChannel?.code) {
@@ -999,7 +1000,7 @@ class MainActivity : Activity() {
                 "NTV" -> "https://yodaplayer.yodacdn.net/ntvpop/index.php"
                 "XEZER" -> "https://xezerxeber.az/en/live"
                 "ANEWZ" -> "https://cdn.maksnet.tv/em/cubesanewz-secure/?abr-app=web&streamname=live"
-                else -> selectedRadio?.let { "https://yodaplayer.yodacdn.net/radiointpop/index.php" }
+                else -> null
             }
             val headers = mutableMapOf(
                 "Accept" to (streamRequestHeaders["Accept"] ?: "*/*"),
@@ -1065,7 +1066,7 @@ class MainActivity : Activity() {
         pageResolutionAttempted++
         pageResolutionInProgress = true
         statusText.setTextColor(textMuted)
-        statusText.text = "Rəsmi səhifədə açıq HLS yayımı axtarılır…"
+        statusText.text = "Alternativ saytda açıq video yayımı axtarılır…"
         resolveHlsFromPage(page) { streamUrl, referer ->
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
@@ -1094,11 +1095,50 @@ class MainActivity : Activity() {
         resolverWebView = webView
         var finish: ((String?) -> Unit)? = null
 
+        val aliases = when (selectedChannel?.code) {
+            "AZTV" -> listOf("aztv", "aztv hd", "azerbaijan television")
+            "MEDEN" -> listOf("mədəniyyət", "medeniyyet", "medeniyyet tv")
+            "NTV" -> listOf("naxçıvan tv", "naxcivan tv", "ntv")
+            "ANEWZ" -> listOf("anewz")
+            "XEZER" -> listOf("xəzər tv", "xezer tv", "xezer")
+            else -> emptyList()
+        }
+        val aliasesJson = org.json.JSONArray(aliases).toString()
         val probeScript = """
             (function() {
+              var desiredNames = $aliasesJson;
+              function norm(s) {
+                return String(s || '').toLowerCase()
+                  .replace(/ə/g,'e').replace(/ı/g,'i').replace(/ç/g,'c')
+                  .replace(/ş/g,'s').replace(/ö/g,'o').replace(/ü/g,'u')
+                  .replace(/ğ/g,'g').replace(/[^a-z0-9]+/g,' ').trim();
+              }
+              // If a provider page lists several channels, choose the channel selected in PulseAZ.
+              try {
+                if (!window.__pulseazChannelSelected && desiredNames.length) {
+                  var nodes = document.querySelectorAll('a,button,[role="button"],[onclick],.channel,.tv-channel');
+                  for (var i=0; i<nodes.length; i++) {
+                    var el = nodes[i];
+                    var label = [el.innerText, el.textContent, el.getAttribute('aria-label'),
+                      el.getAttribute('title'), el.getAttribute('alt')].join(' ');
+                    if (el.querySelector) {
+                      var img = el.querySelector('img');
+                      if (img) label += ' ' + (img.alt || img.title || '');
+                    }
+                    var normalized = norm(label);
+                    if (desiredNames.some(function(name) {
+                      return normalized === norm(name) || normalized.indexOf(norm(name)) >= 0;
+                    })) {
+                      el.click();
+                      window.__pulseazChannelSelected = true;
+                      break;
+                    }
+                  }
+                }
+              } catch(e) {}
               var found = [];
               function add(v) {
-                if (typeof v === 'string' && /^https:\\/\\//i.test(v) && /\\.m3u8(?:$|[?#])/i.test(v)) {
+                if (typeof v === 'string' && /^https:\\/\\//i.test(v) && /\\.(?:m3u8|mpd|mp4|m4v|mp3|m4a|aac)(?:$|[?#])/i.test(v)) {
                   if (found.indexOf(v) < 0) found.push(v);
                 }
               }
@@ -1167,7 +1207,7 @@ class MainActivity : Activity() {
                     val found = runCatching {
                         org.json.JSONTokener(raw ?: "null").nextValue() as? String
                     }.getOrNull()
-                    if (isDirectHlsUrl(found.orEmpty())) finish?.invoke(found)
+                    if (isDirectMediaUrl(found.orEmpty())) finish?.invoke(found)
                 }
                 if (!completed.get() && generation == resolverGeneration) {
                     resolverHandler.postDelayed(this, 750L)
@@ -1226,7 +1266,7 @@ class MainActivity : Activity() {
                     request: WebResourceRequest?
                 ): WebResourceResponse? {
                     val requestUrl = request?.url?.toString().orEmpty()
-                    if (isDirectHlsUrl(requestUrl)) {
+                    if (isDirectMediaUrl(requestUrl)) {
                         val allowedHeaders = setOf("referer", "origin", "user-agent", "accept", "accept-language")
                         val captured = request?.requestHeaders.orEmpty()
                             .filterKeys { it.lowercase() in allowedHeaders }
@@ -1275,11 +1315,11 @@ class MainActivity : Activity() {
         runCatching { webView.loadUrl(pageUrl) }.onFailure { finish?.invoke(null) }
     }
 
-    private fun isDirectHlsUrl(value: String): Boolean {
+    private fun isDirectMediaUrl(value: String): Boolean {
         if (!value.startsWith("https://", ignoreCase = true)) return false
         val parsed = runCatching { Uri.parse(value) }.getOrNull() ?: return false
         val target = (parsed.path.orEmpty() + "?" + parsed.query.orEmpty())
-        return Regex("""(?i)\.m3u8(?:$|[?&#])""").containsMatchIn(target)
+        return Regex("""(?i)\.(?:m3u8|mpd|mp4|m4v|mp3|m4a|aac)(?:$|[?&#])""").containsMatchIn(target)
     }
 
     private fun destroyResolverView() {
