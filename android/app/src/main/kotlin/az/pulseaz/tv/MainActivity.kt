@@ -6,6 +6,11 @@ import android.animation.ValueAnimator
 import android.app.Activity
 import android.app.AlertDialog
 import android.app.PictureInPictureParams
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
+import android.os.IBinder
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
@@ -131,6 +136,9 @@ class MainActivity : Activity() {
     private lateinit var liveBadge: TextView
 
     private var player: ExoPlayer? = null
+    private var playbackService: PulsePlaybackService? = null
+    private var serviceBound = false
+    private var playerListener: Player.Listener? = null
     private var selectedChannel: TvChannel? = null
     private var selectedRadio: RadioStation? = null
     private var selectedCategory = "Hamısı"
@@ -285,38 +293,54 @@ class MainActivity : Activity() {
         loadCatalog()
         buildScreen()
 
-        val httpFactory = DefaultHttpDataSource.Factory()
-            .setUserAgent("Mozilla/5.0 (Linux; Android 11) AppleWebKit/537.36 Chrome/120 Mobile Safari/537.36 PulseAZTV/1.4")
-            .setConnectTimeoutMs(9000)
-            .setReadTimeoutMs(16000)
-            .setAllowCrossProtocolRedirects(true)
+        bindPlaybackService()
+        renderItems()
+        pulse(liveBadge)
+    }
 
-        val loadControl = DefaultLoadControl.Builder()
-            .setBufferDurationsMs(2500, 15000, 1000, 2500)
-            .build()
+    private val playbackConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
+            val service = (binder as? PulsePlaybackService.LocalBinder)?.getService() ?: return
+            playbackService = service
+            player = service.player
+            configurePlayer(player ?: return)
+            playerView.player = player
+            attachPlayerListener(player ?: return)
 
-        player = ExoPlayer.Builder(this)
-            .setLoadControl(loadControl)
-            .setMediaSourceFactory(DefaultMediaSourceFactory(httpFactory))
-            .build()
-
-        player?.let { activePlayer ->
-            activePlayer.setAudioAttributes(
-                AudioAttributes.Builder()
-                    .setUsage(C.USAGE_MEDIA)
-                    .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
-                    .build(),
-                true
-            )
-            // Auto quality adapts up to 3840x2160 when the source and device support it.
-            activePlayer.trackSelectionParameters = activePlayer.trackSelectionParameters
-                .buildUpon()
-                .setMaxVideoSize(3840, 2160)
-                .build()
+            // A channel may have been tapped while the service was still starting.
+            selectedChannel?.let { startStream(it.streams, false) }
+                ?: selectedRadio?.let { startStream(it.streams, true) }
         }
 
-        playerView.player = player
-        player?.addListener(object : Player.Listener {
+        override fun onServiceDisconnected(name: ComponentName?) {
+            playerView.player = null
+            player = null
+            playbackService = null
+        }
+    }
+
+    private fun bindPlaybackService() {
+        val intent = Intent(this, PulsePlaybackService::class.java)
+        serviceBound = bindService(intent, playbackConnection, Context.BIND_AUTO_CREATE)
+    }
+
+    private fun configurePlayer(activePlayer: ExoPlayer) {
+        activePlayer.setAudioAttributes(
+            AudioAttributes.Builder()
+                .setUsage(C.USAGE_MEDIA)
+                .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
+                .build(),
+            true
+        )
+        activePlayer.trackSelectionParameters = activePlayer.trackSelectionParameters
+            .buildUpon()
+            .setMaxVideoSize(3840, 2160)
+            .build()
+    }
+
+    private fun attachPlayerListener(activePlayer: ExoPlayer) {
+        playerListener?.let { activePlayer.removeListener(it) }
+        val listener = object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
                 when (playbackState) {
                     Player.STATE_BUFFERING -> {
@@ -345,10 +369,13 @@ class MainActivity : Activity() {
                     applySvgIcon(playPauseButton, if (isPlaying) "pause" else "play",
                         if (isPlaying) Color.rgb(5, 24, 31) else accent)
                 }
+                selectedRadio?.let { station ->
+                    playbackService?.updateRadioNotification(station.name, isPlaying)
+                }
             }
-        })
-        renderItems()
-        pulse(liveBadge)
+        }
+        playerListener = listener
+        activePlayer.addListener(listener)
     }
 
     private fun buildScreen() {
@@ -1030,8 +1057,19 @@ class MainActivity : Activity() {
         liveBadge.text = "●  TV CANLI"
         guideButton.visibility = if (channel.guideUrl.isNullOrBlank()) View.GONE else View.VISIBLE
         rememberRecent("TV_" + channel.code)
+        playbackService?.updateRadioNotification(channel.name, false)
         statusText.text = "Yayım bağlantısı yoxlanılır…"
         startStream(channel.streams, false)
+    }
+
+    private fun startRadioForeground(station: String) {
+        val intent = Intent(this, PulsePlaybackService::class.java)
+            .putExtra(PulsePlaybackService.EXTRA_STATION, station)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent)
+        } else {
+            startService(intent)
+        }
     }
 
     private fun playRadio(station: RadioStation) {
@@ -1051,6 +1089,7 @@ class MainActivity : Activity() {
         liveBadge.text = "●  RADIO CANLI"
         guideButton.visibility = View.GONE
         rememberRecent("RADIO_" + station.code)
+        startRadioForeground(station.name)
         statusText.text = "Radio bağlantısı yoxlanılır…"
         startStream(station.streams, true)
     }
@@ -1249,6 +1288,10 @@ class MainActivity : Activity() {
             return
         }
 
+        if (player == null) {
+            statusText.text = "Pleyer hazırlanır…"
+            return
+        }
         if (!url.startsWith("https://", ignoreCase = true)) {
             tryNextSource()
             return
@@ -1968,9 +2011,9 @@ class MainActivity : Activity() {
 
     override fun onPause() {
         super.onPause()
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || !isInPictureInPictureMode) {
-            player?.pause()
-        }
+        val radioKeepsPlaying = selectedRadio != null && player?.isPlaying == true
+        val pipKeepsPlaying = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && isInPictureInPictureMode
+        if (!radioKeepsPlaying && !pipKeepsPlaying) player?.pause()
     }
 
     override fun onDestroy() {
@@ -1979,9 +2022,13 @@ class MainActivity : Activity() {
         audioAnimations.forEach { it.cancel() }
         animations.clear()
         audioAnimations.clear()
+        player?.let { active -> playerListener?.let { active.removeListener(it) } }
         playerView.player = null
-        player?.release()
         player = null
+        if (serviceBound) {
+            runCatching { unbindService(playbackConnection) }
+            serviceBound = false
+        }
         super.onDestroy()
     }
 }
