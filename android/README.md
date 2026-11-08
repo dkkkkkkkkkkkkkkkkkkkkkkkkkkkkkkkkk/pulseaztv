@@ -1,43 +1,41 @@
 # PulseAZ TV — Android
 
-PulseAZ TV is a native Android player and directory for Azerbaijani television and radio streams.
+PulseAZ TV is a native Android television and radio player for Azerbaijani channels.
 
-## Version 1.6
+## Version 1.7.0 — Final integration
 
-- Native AndroidX Media3 / ExoPlayer playback with HLS and MPEG-DASH support.
-- Multiple public provider pages per channel: broadcaster player pages plus public aggregators where available. The user can choose a source manually; automatic fallback also tries the list.
-- Provider pages are loaded invisibly and never drawn on screen. Only openly exposed HTTPS media URLs are handed to the native player; no external browser is opened.
-- Channel-aware page selection activates the requested channel on provider pages that list multiple channels, then probes HTML5, JWPlayer, Video.js and visible Play controls.
-- Audio controls include a volume slider, volume up/down and mute/unmute.
-- Video track selection is capped at 3840×2160 (4K). The app can play 4K only if the selected source actually provides a 4K rendition and the phone can decode it; it does not manufacture or upscale real 4K detail from a lower-resolution source.
-- TV and Radio sections, category filters, search and locally saved favourites remain available. Azərbaycan Beynəlxalq Radiosu has been removed from the radio list as requested.
-- Updated high-resolution channel logo sources and a newly generated PulseAZ TV launcher/app logo.
-- Only Referrer/Origin/User-Agent metadata exposed by a public player is passed to Media3; browser session cookies are not forwarded to stream segments or other CDN hosts.
-- Small favicons below 96px are rejected instead of being enlarged and blurred; the app keeps its crisp channel-initial fallback when a high-resolution logo is unavailable.
-- HTTP failures (403, 404, 5xx) are shown in the player status. The app does not bypass DRM, sign-in, geo restrictions, paid subscriptions, signed-token rules or other access controls.
-- Redesigned dark navy interface with an ambient animated gradient, refined typography, animated channel cards, live badge and radio visualizer.
-- Portable TV + radio M3U playlist at `app/src/main/assets/pulseaz-az.m3u`.
+- Imported and deduplicated the previous FCP Player channel catalogue: 41 TV channels and 33 radio stations.
+- Kept Kanal 35 and Azərbaycan Beynəlxalq Radiosu excluded, as requested.
+- Native AndroidX Media3 playback with HLS and MPEG-DASH support.
+- Automatic multi-page and multi-stream fallback. Provider URLs and page names stay internal; the application has no visible source list, external browser or embedded webpage.
+- Hidden resolver can inspect public provider pages for direct media manifests and public API responses. It does not bypass paid access, login, DRM, geo restrictions or server-side access controls.
+- Restored the legacy Yoda public-token request, with a short expiry-aware cache and token application restricted to Yoda CDN media URLs.
+- Added support for publicly returned Catcast and Mediabay manifest fields, where the service returns a directly playable HTTPS media URL.
+- XMLTV programme guide for the imported channels with programme title, time and description.
+- TV/radio search, categories, local favourites and recent-history filter.
+- Radio track metadata lookup for stations that supply a public now-playing feed.
+- Background radio playback through an Android foreground service and notification.
+- TV picture-in-picture support.
+- Video track selection can adapt up to 3840×2160 (4K), only when the selected stream offers a 4K rendition and the phone supports decoding it. Lower-resolution video is not converted into genuine 4K.
+- Volume slider, volume up/down, mute and unmute.
+- Original PulseAZ launcher icon, refined typography, high-quality logo fallbacks, animated ambient background and channel-card motion.
+- No exported M3U playlist or source directory is bundled in the final APK.
 
+## Important playback notes
 
-## Stream catalogue sources
+The app cannot make a broadcaster's server available when the server is offline, rejects the request, requires a paid account, requires a restricted IP/region, or protects content with DRM. It only plays direct media URLs that the selected public player/API exposes. Stream availability can change without an app update.
 
-TV stream candidates were researched against the public [iptv-org Azerbaijan stream list](https://github.com/iptv-org/iptv/blob/master/streams/az.m3u). This is a community-maintained index, not an official guarantee from each broadcaster. It also explicitly marks CBC Sport as geo-blocked; that stream is intentionally not included.
+Logo images that cannot be fetched at a sufficient resolution use a clean channel-initial fallback rather than an enlarged blurry favicon.
 
-Radio candidates were researched against the Azerbaijan station directory at [FreqTrail](https://www.freqtrail.com/stations/AZ), which lists direct stream URLs and identifies some as currently working. Only HTTPS candidates have been included in this build. Directory checks do not guarantee that a station will remain online.
+## Build
 
-The application does not host, record, proxy, restream, or bypass DRM, sign-in, geographic restrictions, signed-token restrictions or other access controls for media. No broadcaster website is embedded or opened from the app. Streams may stop working, become region-restricted, or change without notice. A channel is not marked as successfully playing until the player itself receives media.
+The GitHub Actions workflow `.github/workflows/android-apk.yml` builds the Android debug APK.
 
-## Build a debug APK
+- JDK 17
+- Gradle 8.13
+- Android Gradle Plugin 8.13.2
+- Kotlin 2.3.0
+- Android API 36
+- AndroidX Media3 1.11.1
 
-The GitHub Actions workflow `.github/workflows/android-apk.yml` builds the debug APK on pushes to the Android project.
-
-1. Open the repository Actions tab.
-2. Select **Build PulseAZ TV APK**.
-3. Open the latest successful run.
-4. Download the **PulseAZ-TV-debug-apk** artifact and extract `app-debug.apk`.
-
-The project uses JDK 17, Gradle 8.13, Android Gradle Plugin 8.13.2, Kotlin 2.3.0, Android API 36 and AndroidX Media3 1.11.1 (ExoPlayer, HLS and DASH). App version is 1.6.0 (versionCode 7). AzTV's paid Cinerama source and Kanal 35 have been removed.
-
-## Logo sources
-
-The launcher icon is an original PulseAZ TV design generated for this project. Channel identification artwork uses the AzTV (2019), Mədəniyyət TV (2019) and Naxçıvan TV (2025) images listed as CC0 on Wikimedia Commons, the AnewZ logo served by AnewZ's own website, and the Xəzər TV image supplied on TVSTREAM.AZ. Channel marks are displayed only to identify the selected broadcaster.
+App version: **1.7.0** (versionCode 8).
