@@ -5,7 +5,7 @@
 # https://github.com/iptv-org/iptv/blob/master/streams/az.m3u
 # Radio candidates are listed as direct HTTPS streams in the Azerbaijan station directory:
 # https://www.freqtrail.com/stations/AZ
-# Broadcaster pages are never displayed. A transparent hidden probe monitors official players for exposed HTTPS HLS and hands it to native Media3.
+# Broadcaster pages are never displayed. A transparent hidden probe checks public provider pages for exposed HTTPS HLS/DASH media and hands it to native Media3.
 # Links may change or be restricted by operators; availability is not guaranteed.
 
 #EXTINF:-1 tvg-id="AzTV.az" tvg-logo="https://www.google.com/s2/favicons?domain=aztv.az&sz=256" group-title="TV | Xəbər",AzTV (Yoda)
@@ -43,10 +43,6 @@ https://nl.livekadeh.com/hls2/vilayet.m3u8
 
 #EXTINF:-1 tvg-id="IctimaiRadio.az" tvg-logo="https://www.google.com/s2/favicons?domain=itv.az&sz=128" group-title="Radio | Xəbər",İctimai Radio 90 FM
 https://stream.itv.az/rtmp:/radio/playlist.m3u8
-#EXTINF:-1 tvg-id="AzerbaijanInternationalRadio.az" tvg-logo="https://www.google.com/s2/favicons?domain=internationalradio.az&sz=256" group-title="Radio | Milli",Azərbaycan Beynəlxalq Radiosu (Yoda)
-https://str.yodacdn.net/radio_int/tracks-v1a1/mono.m3u8
-#EXTINF:-1 tvg-id="AzerbaijanInternationalRadio.az" tvg-logo="https://www.google.com/s2/favicons?domain=internationalradio.az&sz=256" group-title="Radio | Milli",Azərbaycan Beynəlxalq Radiosu (alternate)
-https://str.yodacdn.net/radio_int/tracks-a1/mono.m3u8
 #EXTINF:-1 tvg-id="ArazFM.az" tvg-logo="https://www.google.com/s2/favicons?domain=arazfm.az&sz=128" group-title="Radio | Musiqi",Araz FM 103.3
 https://s14.myradiostream.com/30454/listen.mp3
 #EXTINF:-1 tvg-id="AsanRadio.az" tvg-logo="https://www.google.com/s2/favicons?domain=asanradio.az&sz=128" group-title="Radio | Xəbər",ASAN Radio
