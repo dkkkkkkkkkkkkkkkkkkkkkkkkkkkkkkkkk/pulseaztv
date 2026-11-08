@@ -1,14 +1,26 @@
 # PulseAZ TV — Android
 
-PulseAZ TV is an Android HLS player and directory for Azerbaijani television channels.
+PulseAZ TV is a native Android player and directory for Azerbaijani television and radio streams.
 
-## Features
+## Version 1.1
 
-- Native Android player built with AndroidX Media3 / ExoPlayer.
-- Channel search, categories and locally saved favourites.
-- Channel cards with remote logos where a public logo image is available, plus clean initials as a fallback.
-- Official-site fallback for channels where a direct HLS endpoint was not found or is known to be restricted.
-- A portable M3U playlist is included at `app/src/main/assets/pulseaz-az.m3u`.
+- Redesigned dark navy interface with teal/blue accents, rounded cards, animated list entrances and a live indicator.
+- Native AndroidX Media3 / ExoPlayer playback. Channel selection never opens a website or an external browser.
+- TV and Radio sections, category filters, search and locally saved favourites.
+- Per-stream fallback URLs where an alternate public stream is available.
+- Video quality dialog exposes the video tracks actually offered by the selected HLS source. It cannot invent resolutions that the broadcaster does not provide.
+- Player resize modes: FIT, ZOOM and FILL.
+- Radio playback for public direct HTTPS MP3/AAC/HLS URLs, with an animated audio visualizer.
+- Station/channel marks use public favicons when available and clean initials as a fallback.
+- Portable TV + radio M3U playlist at `app/src/main/assets/pulseaz-az.m3u`.
+
+## Stream catalogue sources
+
+TV stream candidates were researched against the public [iptv-org Azerbaijan stream list](https://github.com/iptv-org/iptv/blob/master/streams/az.m3u). This is a community-maintained index, not an official guarantee from each broadcaster. It also explicitly marks CBC Sport as geo-blocked; that stream is intentionally not included.
+
+Radio candidates were researched against the Azerbaijan station directory at [FreqTrail](https://www.freqtrail.com/stations/AZ), which lists direct stream URLs and identifies some as currently working. Only HTTPS candidates have been included in this build. Directory checks do not guarantee that a station will remain online.
+
+The application does not host, record, proxy, restream, or bypass access controls for media. No broadcaster website is embedded or opened from the app. Streams may stop working, become region-restricted, or change without notice. A channel is not marked as successfully playing until the player itself receives media.
 
 ## Build a debug APK
 
@@ -19,10 +31,4 @@ The GitHub Actions workflow `.github/workflows/android-apk.yml` builds the debug
 3. Open the latest successful run.
 4. Download the **PulseAZ-TV-debug-apk** artifact and extract `app-debug.apk`.
 
-The project uses JDK 17, Gradle 8.13, Android Gradle Plugin 8.13.2, Kotlin 2.3.0, Android API 36 and AndroidX Media3 1.11.1.
-
-## Stream and rights note
-
-The M3U URLs are sourced from the publicly maintained [iptv-org Azerbaijan stream list](https://github.com/iptv-org/iptv/blob/master/streams/az.m3u). The list is community-maintained, not an assurance that every endpoint is controlled by the channel or currently available. Some broadcaster streams may be temporarily offline, geo-restricted, or require a change by the provider. CBC Sport's listed HLS endpoint is marked geo-blocked, so the app deliberately directs users to the official site instead.
-
-The app does not host, record, proxy, restream or bypass access controls for any channel. Channel owners may change or withdraw streams at any time. Use the official channel website when a stream is unavailable, and follow the broadcaster's terms and regional restrictions.
+The project uses JDK 17, Gradle 8.13, Android Gradle Plugin 8.13.2, Kotlin 2.3.0, Android API 36 and AndroidX Media3 1.11.1. App version is 1.1.0.
